@@ -1,0 +1,26 @@
+server:
+   port: 8080
+
+spring:
+
+  output:
+    ansi:
+      enabled: ALWAYS
+
+  application:
+    name: goldencashbunny-backend
+
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url:
+    username:
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+
+
+feign:
+  okhttp:
+    enabled: true
