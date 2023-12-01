@@ -15,4 +15,10 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findByCpf(String cpf);
 
     Optional<Account> findByCnpj(String cnpj);
+
+    boolean existsByEmailAndEmailIsNotNull(String email);
+
+    boolean existsByCpfAndCpfIsNotNull(String cpf);
+
+    boolean existsByCnpjAndCnpjIsNotNull(String cnpj);
 }
