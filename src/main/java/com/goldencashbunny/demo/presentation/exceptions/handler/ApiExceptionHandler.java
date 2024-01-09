@@ -1,6 +1,9 @@
 package com.goldencashbunny.demo.presentation.exceptions.handler;
 
-import com.goldencashbunny.demo.presentation.exceptions.DuplicationOnRegistrationException;
+import com.goldencashbunny.demo.presentation.exceptions.base.BadRequestException;
+import com.goldencashbunny.demo.presentation.exceptions.base.ConflictException;
+import com.goldencashbunny.demo.presentation.exceptions.base.NotFoundException;
+import com.goldencashbunny.demo.presentation.exceptions.base.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -10,15 +13,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler({DuplicationOnRegistrationException.class})
-    protected ResponseEntity<Object> handleDuplicationOnRegistrationException(
-            DuplicationOnRegistrationException e,
+    @ExceptionHandler({ConflictException.class})
+    protected ResponseEntity<Object> handleConflictException(
+            ConflictException e,
             WebRequest request,
             HttpServletRequest httpServletRequest
     ) {
@@ -38,16 +40,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
-    @ExceptionHandler({IllegalArgumentException.class})
-    protected ResponseEntity<Object> handleIllegalArgumentException(
-            IllegalArgumentException e,
+    @ExceptionHandler({BadRequestException.class})
+    protected ResponseEntity<Object> handleBadRequestException(
+            BadRequestException e,
             WebRequest request,
             HttpServletRequest httpServletRequest
     ) {
         ApiExceptionResponse apiExceptionResponse = ApiExceptionResponse.builder()
                 .errorMessage(e.getMessage())
-                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .timestamp(e.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .instance(httpServletRequest.getRequestURI())
+                .details(e.getDetails())
                 .build();
 
         return handleExceptionInternal(
@@ -55,6 +58,50 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                 apiExceptionResponse,
                 new HttpHeaders(),
                 HttpStatus.BAD_REQUEST,
+                request
+        );
+    }
+
+    @ExceptionHandler({UnauthorizedException.class})
+    protected ResponseEntity<Object> handleUnauthorizedException(
+            UnauthorizedException e,
+            WebRequest request,
+            HttpServletRequest httpServletRequest
+    ) {
+        ApiExceptionResponse apiExceptionResponse = ApiExceptionResponse.builder()
+                .errorMessage(e.getMessage())
+                .timestamp(e.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .instance(httpServletRequest.getRequestURI())
+                .details(e.getDetails())
+                .build();
+
+        return handleExceptionInternal(
+                e,
+                apiExceptionResponse,
+                new HttpHeaders(),
+                HttpStatus.UNAUTHORIZED,
+                request
+        );
+    }
+
+    @ExceptionHandler({NotFoundException.class})
+    protected ResponseEntity<Object> handleNotFoundException(
+            NotFoundException e,
+            WebRequest request,
+            HttpServletRequest httpServletRequest
+    ) {
+        ApiExceptionResponse apiExceptionResponse = ApiExceptionResponse.builder()
+                .errorMessage(e.getMessage())
+                .timestamp(e.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .instance(httpServletRequest.getRequestURI())
+                .details(e.getDetails())
+                .build();
+
+        return handleExceptionInternal(
+                e,
+                apiExceptionResponse,
+                new HttpHeaders(),
+                HttpStatus.NOT_FOUND,
                 request
         );
     }

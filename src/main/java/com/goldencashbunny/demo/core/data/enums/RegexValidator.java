@@ -1,5 +1,6 @@
 package com.goldencashbunny.demo.core.data.enums;
 
+import com.goldencashbunny.demo.presentation.exceptions.RegexValidationException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,8 +18,12 @@ public enum RegexValidator {
     private final String regex;
 
     public static void applyRegexValidation(RegexValidator regex, String input, String errorMessage) {
-        if(!Pattern.matches(regex.getRegex(), input)) {
-            throw new IllegalArgumentException(errorMessage);
+        if (!Pattern.matches(regex.getRegex(), input)) {
+            throw new RegexValidationException(errorMessage);
         }
+    }
+
+    public static boolean applyRegexValidation(RegexValidator regex, String input){
+        return Pattern.matches(regex.getRegex(), input);
     }
 }

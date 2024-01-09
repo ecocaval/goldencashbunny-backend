@@ -1,58 +1,168 @@
 package com.goldencashbunny.demo.core.usecases.implementations;
 
+import com.goldencashbunny.demo.core.data.enums.AccountRole;
+import com.goldencashbunny.demo.core.data.enums.LoginIdentification;
 import com.goldencashbunny.demo.core.data.enums.RegexValidator;
+import com.goldencashbunny.demo.core.data.requests.CreateAccountRequest;
+import com.goldencashbunny.demo.core.data.requests.UpdateAccountRequest;
 import com.goldencashbunny.demo.core.messages.ErrorMessages;
 import com.goldencashbunny.demo.core.usecases.AccountUseCase;
 import com.goldencashbunny.demo.core.utils.AsciiUtils;
 import com.goldencashbunny.demo.presentation.entities.Account;
+import com.goldencashbunny.demo.presentation.exceptions.AccountNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.DuplicationOnRegistrationException;
+import com.goldencashbunny.demo.presentation.exceptions.RoleNotFoundException;
 import com.goldencashbunny.demo.presentation.repositories.AccountRepository;
+import com.goldencashbunny.demo.presentation.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AccountUseCaseImpl implements AccountUseCase {
 
     private final AccountRepository accountRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     private final AsciiUtils asciiUtils;
 
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
-    public AccountUseCaseImpl(AccountRepository accountRepository) {
+    public AccountUseCaseImpl(
+        AccountRepository accountRepository, RoleRepository roleRepository
+    ) {
         this.accountRepository = accountRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.roleRepository = roleRepository;
         this.asciiUtils = new AsciiUtils();
     }
 
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
-    public Account create(Account account) {
+    public Account findById(String accountId, boolean shouldThrowException) {
+        var account = this.accountRepository.findByIdAndDeletedFalse(UUID.fromString(accountId));
 
-        this.cleanCreationInputs(account);
+        if(account.isEmpty() && shouldThrowException) {
+            throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_ID.getMessage());
+        }
 
-        this.validateCreationInputs(account);
+        return account.orElse(null);
+    }
 
-        this.validateDuplicityInRegister(account);
+    @Override
+    public Account findByUserName(String userName, boolean shouldThrowException) {
+        var account = this.accountRepository.findByUserNameAndDeletedFalse(userName);
+
+        if(account.isEmpty() && shouldThrowException) {
+            throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_USERNAME.getMessage());
+        }
+
+        return account.orElse(null);
+    }
+
+    @Override
+    public Account findByEmail(String email, boolean shouldThrowException) {
+        var account = this.accountRepository.findByEmailAndDeletedFalse(email);
+
+        if(account.isEmpty() && shouldThrowException) {
+            throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_EMAIL.getMessage());
+        }
+
+        return account.orElse(null);
+    }
+
+    @Override
+    public Account findByCpf(String cpf, boolean shouldThrowException) {
+        var account = this.accountRepository.findByCpfAndDeletedFalse(asciiUtils.cleanDocumentString(cpf));
+
+        if(account.isEmpty() && shouldThrowException) {
+            throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_CPF.getMessage());
+        }
+
+        return account.orElse(null);
+    }
+
+    @Override
+    public Account findByCnpj(String cnpj, boolean shouldThrowException) {
+        var account = this.accountRepository.findByCnpjAndDeletedFalse(asciiUtils.cleanDocumentString(cnpj));
+
+        if(account.isEmpty() && shouldThrowException) {
+            throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_CNPJ.getMessage());
+        }
+
+        return account.orElse(null);
+    }
+
+    @Override
+    public Account findByLogin(String login) {
+
+        return switch (LoginIdentification.getFromLogin(login)) {
+            case USERNAME -> this.findByUserName(login, Boolean.TRUE);
+            case EMAIL -> this.findByEmail(login, Boolean.TRUE);
+            case CPF -> this.findByCpf(login, Boolean.TRUE);
+            case CNPJ -> this.findByCnpj(login, Boolean.TRUE);
+        };
+    }
+
+    @Override
+    public Account create(CreateAccountRequest request) {
+
+        var account = Account.fromCreateRequest(request);
+
+        this.cleanInputs(account);
+
+        this.validateInputs(account);
+
+        this.validateDuplicity(account);
 
         this.encryptAccountPassword(account);
+
+        var role = this.roleRepository.findByName(AccountRole.USER).orElseThrow(RoleNotFoundException::new);
+
+        account.setRoles(List.of(role));
 
         return this.accountRepository.save(account);
     }
 
-    private void cleanCreationInputs(Account account) {
+    @Override
+    public Account update(UpdateAccountRequest request, String accountId) {
+
+        var notUpdatedAccount = this.findById(accountId, Boolean.TRUE);
+
+        var account = Account.fromUpdateRequest(request);
+
+        this.cleanInputs(account);
+
+        this.validateInputs(account);
+
+        this.validateDuplicity(account);
+
+        account = Account.complementUpdateInformation(account, notUpdatedAccount);
+
+        return this.accountRepository.save(account);
+    }
+
+    private void cleanInputs(Account account) {
         account.setEmail(asciiUtils.cleanString(account.getEmail()));
         account.setCpf(asciiUtils.cleanDocumentString(account.getCpf()));
         account.setCnpj(asciiUtils.cleanDocumentString(account.getCnpj()));
     }
 
-    private void validateCreationInputs(Account account) {
-        RegexValidator.applyRegexValidation(
-                RegexValidator.EMAIL_REGEX,
-                account.getEmail(),
-                ErrorMessages.ERROR_ACCOUNT_EMAIL_OUT_OF_PATTERN.getMessage()
-        );
+    private void validateInputs(Account account) {
+        if(account.getEmail() != null)
+            RegexValidator.applyRegexValidation(
+                    RegexValidator.EMAIL_REGEX,
+                    account.getEmail(),
+                    ErrorMessages.ERROR_ACCOUNT_EMAIL_OUT_OF_PATTERN.getMessage()
+            );
 
         if(account.getCpf() != null)
             RegexValidator.applyRegexValidation(
@@ -73,7 +183,7 @@ public class AccountUseCaseImpl implements AccountUseCase {
         account.setPassword(passwordEncoder.encode(account.getPassword()));
     }
 
-    private void validateDuplicityInRegister(Account account) {
+    private void validateDuplicity(Account account) {
 
         if (this.accountRepository.existsByEmailAndEmailIsNotNull(account.getEmail()))
             throw new DuplicationOnRegistrationException(

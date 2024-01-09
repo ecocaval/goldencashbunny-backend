@@ -1,4 +1,4 @@
-package com.goldencashbunny.demo.presentation.exceptions;
+package com.goldencashbunny.demo.presentation.exceptions.base;
 
 import lombok.Getter;
 
