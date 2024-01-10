@@ -1,4 +1,4 @@
-package com.goldencashbunny.demo.core.utils;
+package com.goldencashbunny.demo.infra.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -26,11 +26,11 @@ public class JwtUtils {
         this.TOKEN_ALGORITHM = Algorithm.HMAC256(SECRET);
     }
 
-    public static boolean checkRoleOrSameUser(Object identification) {
+    public static boolean checkAdminRoleOrSameAccount(Object identification) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(userIsAdmin(authentication)) {
+        if(accountIsAdmin(authentication)) {
             return true;
         }
 
@@ -54,7 +54,7 @@ public class JwtUtils {
         return listOfIdentificationsFromToken;
     }
 
-    private static boolean userIsAdmin(Authentication authentication) {
+    private static boolean accountIsAdmin(Authentication authentication) {
 
         for (GrantedAuthority authority : authentication.getAuthorities()) {
             if(authority.getAuthority().equals(AccountRole.ADMIN.getRole())) {

@@ -6,7 +6,7 @@ import com.goldencashbunny.demo.core.messages.ErrorMessages;
 import com.goldencashbunny.demo.core.usecases.AccountUseCase;
 import com.goldencashbunny.demo.core.usecases.AuthenticationUseCase;
 import com.goldencashbunny.demo.core.utils.DateAndTimeUtils;
-import com.goldencashbunny.demo.core.utils.JwtUtils;
+import com.goldencashbunny.demo.infra.security.JwtUtils;
 import com.goldencashbunny.demo.presentation.entities.Account;
 import com.goldencashbunny.demo.presentation.exceptions.InvalidLoginException;
 import org.springframework.security.crypto.password.PasswordEncoder;

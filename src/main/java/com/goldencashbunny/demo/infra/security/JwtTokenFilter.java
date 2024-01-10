@@ -55,9 +55,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 }
             }
         } catch (JWTVerificationException exception) {
-            //FIXME: for some reason this response is not being sent
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
-//            return;
+
+            //FIXME: for some reason this response is not being sent, and being replaced by a default 403
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+            return;
         }
 
         filterChain.doFilter(request, response);
