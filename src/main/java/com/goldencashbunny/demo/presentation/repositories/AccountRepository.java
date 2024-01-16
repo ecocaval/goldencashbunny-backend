@@ -10,13 +10,11 @@ import java.util.UUID;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, UUID> {
 
-    Optional<Account> findByIdAndDeletedFalse(UUID id);
+    Optional<Account> findByUserName(String email);
 
-    Optional<Account> findByUserNameAndDeletedFalse(String email);
+    Optional<Account> findByEmail(String email);
 
-    Optional<Account> findByEmailAndDeletedFalse(String email);
-
-    Optional<Account> findByCpfAndDeletedFalse(String cpf);
+    Optional<Account> findByCpf(String cpf);
 
     Optional<Account> findByCnpjAndDeletedFalse(String cnpj);
 

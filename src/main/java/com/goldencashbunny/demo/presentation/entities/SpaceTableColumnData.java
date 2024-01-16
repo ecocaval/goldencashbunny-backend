@@ -1,9 +1,8 @@
 package com.goldencashbunny.demo.presentation.entities;
 
+import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
@@ -12,7 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Data
+@Getter
+@Setter
 public class SpaceTableColumnData extends BaseEntity {
 
     @ManyToOne

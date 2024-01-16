@@ -1,24 +1,21 @@
 package com.goldencashbunny.demo.presentation.entities;
 
 import com.goldencashbunny.demo.core.data.enums.AccountRole;
-import com.goldencashbunny.demo.core.data.requests.CreateAccountRequest;
-import com.goldencashbunny.demo.core.data.requests.UpdateAccountRequest;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Data
+@Getter
+@Setter
+@ToString
 public class Role extends BaseEntity {
 
     @Column(length = 50, nullable = false)

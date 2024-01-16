@@ -1,10 +1,9 @@
 package com.goldencashbunny.demo.presentation.entities;
 
 import com.goldencashbunny.demo.core.data.enums.SpaceTableColumnType;
+import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -13,7 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Data
+@Getter
+@Setter
 public class SpaceTableColumn extends BaseEntity {
 
     @Column(nullable = false)

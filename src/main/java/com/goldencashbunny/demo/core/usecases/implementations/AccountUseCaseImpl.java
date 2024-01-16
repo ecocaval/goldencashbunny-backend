@@ -48,7 +48,7 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     @Override
     public Account findById(String accountId, boolean shouldThrowException) {
-        var account = this.accountRepository.findByIdAndDeletedFalse(UUID.fromString(accountId));
+        var account = this.accountRepository.findById(UUID.fromString(accountId));
 
         if(account.isEmpty() && shouldThrowException) {
             throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_ID.getMessage());
@@ -59,7 +59,7 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     @Override
     public Account findByUserName(String userName, boolean shouldThrowException) {
-        var account = this.accountRepository.findByUserNameAndDeletedFalse(userName);
+        var account = this.accountRepository.findByUserName(userName);
 
         if(account.isEmpty() && shouldThrowException) {
             throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_USERNAME.getMessage());
@@ -70,7 +70,7 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     @Override
     public Account findByEmail(String email, boolean shouldThrowException) {
-        var account = this.accountRepository.findByEmailAndDeletedFalse(email);
+        var account = this.accountRepository.findByEmail(email);
 
         if(account.isEmpty() && shouldThrowException) {
             throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_EMAIL.getMessage());
@@ -81,7 +81,7 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     @Override
     public Account findByCpf(String cpf, boolean shouldThrowException) {
-        var account = this.accountRepository.findByCpfAndDeletedFalse(asciiUtils.cleanDocumentString(cpf));
+        var account = this.accountRepository.findByCpf(asciiUtils.cleanDocumentString(cpf));
 
         if(account.isEmpty() && shouldThrowException) {
             throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_CPF.getMessage());

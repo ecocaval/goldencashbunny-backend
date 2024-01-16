@@ -1,4 +1,4 @@
-package com.goldencashbunny.demo.presentation.entities;
+package com.goldencashbunny.demo.presentation.entities.base;
 
 import jakarta.persistence.*;
 import lombok.Data;

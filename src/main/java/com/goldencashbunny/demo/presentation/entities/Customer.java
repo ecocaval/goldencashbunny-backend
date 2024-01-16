@@ -1,16 +1,20 @@
 package com.goldencashbunny.demo.presentation.entities;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Data
+@Getter
+@Setter
+@ToString
 public class Customer extends BaseEntity {
 
     @Column(nullable = false)
@@ -39,4 +43,5 @@ public class Customer extends BaseEntity {
 
     @OneToOne(cascade = CascadeType.ALL)
     private Address Address;
+
 }

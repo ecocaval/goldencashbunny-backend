@@ -2,9 +2,11 @@ package com.goldencashbunny.demo.presentation.entities;
 
 import com.goldencashbunny.demo.core.data.requests.CreateAccountRequest;
 import com.goldencashbunny.demo.core.data.requests.UpdateAccountRequest;
+import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +17,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Data
+@Getter
+@Setter
+@ToString
+@SQLRestriction("deleted = false")
 public class Account extends BaseEntity {
 
     @Column(length = 50, nullable = false)
@@ -41,6 +46,7 @@ public class Account extends BaseEntity {
     private List<Role> roles;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "account")
+    @ToString.Exclude
     private List<Workspace> workspaces;
 
     public static Account fromCreateRequest(CreateAccountRequest createAccountRequest) {

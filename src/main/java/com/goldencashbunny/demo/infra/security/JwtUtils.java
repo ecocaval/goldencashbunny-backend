@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.goldencashbunny.demo.core.data.enums.AccountRole;
+import com.goldencashbunny.demo.core.messages.ErrorMessages;
+import com.goldencashbunny.demo.presentation.exceptions.base.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,7 +28,13 @@ public class JwtUtils {
         this.TOKEN_ALGORITHM = Algorithm.HMAC256(SECRET);
     }
 
-    public static boolean checkAdminRoleOrSameAccount(Object identification) {
+    public static void validateAdminRoleOrSameAccount(Object identification) {
+        if(!JwtUtils.checkAdminRoleOrSameAccount(identification)) {
+            throw new UnauthorizedException(ErrorMessages.ERROR_INVALID_TOKEN.getMessage());
+        }
+    }
+
+    private static boolean checkAdminRoleOrSameAccount(Object identification) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

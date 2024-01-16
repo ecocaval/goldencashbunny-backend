@@ -1,23 +1,19 @@
 package com.goldencashbunny.demo.presentation.entities;
 
+import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.UUID;
-
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Data
-public class Address extends BaseEntity{
+@Getter
+@Setter
+public class Address extends BaseEntity {
 
     @Column(length = 8, nullable = false)
     private String zipCode;

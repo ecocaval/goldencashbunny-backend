@@ -28,9 +28,7 @@ public class AccountController {
     @GetMapping("/id/{accountId}")
     public ResponseEntity<AccountResponse> findById(@PathVariable("accountId") String accountId) {
 
-        if(!JwtUtils.checkAdminRoleOrSameAccount(accountId)) {
-            throw new UnauthorizedException(ErrorMessages.ERROR_INVALID_TOKEN.getMessage());
-        }
+        JwtUtils.validateAdminRoleOrSameAccount(accountId);
 
         return ResponseEntity.status(HttpStatus.OK).body(
             AccountResponse.fromAccount(this.accountUseCase.findById(accountId, Boolean.TRUE))
@@ -40,9 +38,7 @@ public class AccountController {
     @GetMapping("/email/{email}")
     public ResponseEntity<AccountResponse> findByEmail(@PathVariable("email") String email) {
 
-        if(!JwtUtils.checkAdminRoleOrSameAccount(email)) {
-            throw new UnauthorizedException(ErrorMessages.ERROR_INVALID_TOKEN.getMessage());
-        }
+        JwtUtils.validateAdminRoleOrSameAccount(email);
 
         RegexValidator.applyRegexValidation(
             RegexValidator.EMAIL_REGEX, email, ErrorMessages.ERROR_ACCOUNT_EMAIL_OUT_OF_PATTERN.getMessage()
@@ -65,6 +61,8 @@ public class AccountController {
         @RequestBody UpdateAccountRequest request,
         @PathVariable("accountId") String accountId
     ) {
+        JwtUtils.validateAdminRoleOrSameAccount(accountId);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(
             AccountResponse.fromAccount(this.accountUseCase.update(request, accountId))
         );

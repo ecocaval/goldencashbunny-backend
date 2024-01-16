@@ -22,6 +22,7 @@ public enum ErrorMessages {
     ERROR_ACCOUNT_DUPLICATED_BY_CNPJ("Já existe uma conta registrada com este cnpj."),
     ERROR_ACCOUNT_INVALID_LOGIN("Não encontramos uma conta para o login fornecido."),
     ERROR_DURING_TOKEN_GENERATION("Um erro ocorreu ao tentar gerar token."),
+    ERROR_WORKSPACE_NOT_FOUND_BY_ID("O workspace com este id não foi encontrada."),
     ERROR_INVALID_TOKEN("Por favor, envie um token válido para acessar este recurso."),
     ;
 

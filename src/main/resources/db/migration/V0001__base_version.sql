@@ -28,7 +28,7 @@ CREATE TABLE address (
 );
 
 CREATE TABLE customer (
-  id UUID NOT NULL,
+   id UUID NOT NULL,
    creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
    last_modified_date TIMESTAMP WITHOUT TIME ZONE,
    deleted BOOLEAN DEFAULT FALSE NOT NULL,
