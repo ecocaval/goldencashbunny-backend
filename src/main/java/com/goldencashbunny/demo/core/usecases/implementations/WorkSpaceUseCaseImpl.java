@@ -9,13 +9,12 @@ import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.core.utils.UuidUtils;
 import com.goldencashbunny.demo.presentation.entities.Workspace;
 import com.goldencashbunny.demo.presentation.exceptions.WorkSpaceNotFoundException;
-import com.goldencashbunny.demo.presentation.exceptions.base.BadRequestException;
 import com.goldencashbunny.demo.presentation.repositories.WorkspaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 @Service
 public class WorkSpaceUseCaseImpl implements WorkSpaceUseCase {
@@ -35,10 +34,9 @@ public class WorkSpaceUseCaseImpl implements WorkSpaceUseCase {
     @Override
     public Workspace findById(String workSpaceId) {
         return this.workspaceRepository.findById(
-                UuidUtils.getValidUuidFromString(workSpaceId, "O id do workSpace é inválido.")
+                UuidUtils.getValidUuidFromString(workSpaceId, ErrorMessages.ERROR_INVALID_WORKSPACE_ID.getMessage())
         ).orElseThrow(() -> new WorkSpaceNotFoundException(ErrorMessages.ERROR_WORKSPACE_NOT_FOUND_BY_ID.getMessage()));
     }
-
 
     @Override
     public Workspace create(CreateWorkSpaceRequest request, String accountId) {
@@ -58,14 +56,14 @@ public class WorkSpaceUseCaseImpl implements WorkSpaceUseCase {
     }
 
     @Override
-    public void delete(Workspace workspace) {
-        this.workspaceRepository.delete(workspace);
+    public void deleteMany(Set<Workspace> workspaces) {
+        this.workspaceRepository.deleteAll(workspaces);
     }
 
     @Override
-    public List<Workspace> findWorkSpacesByAccountId(String accountId) {
-        return this.workspaceRepository.findByAccountId(
-            UuidUtils.getValidUuidFromString(accountId, "O id da conta é inválido.")
+    public Set<Workspace> findWorkSpacesByAccountId(String accountId) {
+        return this.workspaceRepository.findByAccountIdOrderByIsFavoriteDesc(
+            UuidUtils.getValidUuidFromString(accountId, ErrorMessages.ERROR_INVALID_ACCOUNT_ID.getMessage())
         );
     }
 

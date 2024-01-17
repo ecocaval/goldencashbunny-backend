@@ -1,8 +1,7 @@
 package com.goldencashbunny.demo.presentation.entities.base;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,9 @@ import java.util.UUID;
 @MappedSuperclass
 @SuperBuilder
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
+@Getter
+@Setter
 public class BaseEntity {
 
     @Id

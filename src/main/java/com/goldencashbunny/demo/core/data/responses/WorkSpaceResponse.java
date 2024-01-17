@@ -18,11 +18,14 @@ public class WorkSpaceResponse {
 
     private String socialCompanyName;
 
+    private boolean isFavorite;
+
     public static WorkSpaceResponse fromWorkSpace(Workspace workSpace) {
         return WorkSpaceResponse.builder()
                 .id(workSpace.getId())
                 .companyName(workSpace.getCompanyName())
                 .socialCompanyName(workSpace.getSocialCompanyName())
+                .isFavorite(workSpace.isFavorite())
                 .build();
     }
 }

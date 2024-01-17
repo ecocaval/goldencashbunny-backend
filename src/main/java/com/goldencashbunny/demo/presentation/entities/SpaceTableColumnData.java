@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.UUID;
-
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,7 +18,7 @@ public class SpaceTableColumnData extends BaseEntity {
     private SpaceTableColumn spaceTableColumn;
 
     @Column(nullable = false)
-    private UUID spaceTableRowReference;
+    private Integer rowReference;
 
     @Column(nullable = false)
     private String value;

@@ -2,10 +2,13 @@ package com.goldencashbunny.demo.presentation.controllers;
 
 import com.goldencashbunny.demo.core.data.requests.CreateWorkSpaceRequest;
 import com.goldencashbunny.demo.core.data.requests.UpdateWorkSpaceRequest;
+import com.goldencashbunny.demo.core.data.responses.DeleteWorkSpacesResponse;
 import com.goldencashbunny.demo.core.data.responses.WorkSpaceResponse;
-import com.goldencashbunny.demo.core.messages.ErrorMessages;
 import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.infra.security.JwtUtils;
+import com.goldencashbunny.demo.presentation.entities.Workspace;
+import com.goldencashbunny.demo.presentation.exceptions.WorkSpaceNotFoundException;
+import com.goldencashbunny.demo.presentation.exceptions.base.BadRequestException;
 import com.goldencashbunny.demo.presentation.exceptions.base.UnauthorizedException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("v1/workspace")
@@ -27,7 +32,7 @@ public class WorkSpaceController {
     }
 
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<WorkSpaceResponse>> getWorkSpacesByAccountId(@PathVariable("accountId") String accountId) {
+    public ResponseEntity<List<WorkSpaceResponse>> findByAccountId(@PathVariable("accountId") String accountId) {
 
         JwtUtils.validateAdminRoleOrSameAccount(accountId);
 
@@ -63,19 +68,44 @@ public class WorkSpaceController {
         JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                WorkSpaceResponse.fromWorkSpace(this.workSpaceUseCase.update(request, workSpace))
+            WorkSpaceResponse.fromWorkSpace(this.workSpaceUseCase.update(request, workSpace))
         );
     }
 
-    @DeleteMapping("/{workSpaceId}")
-    public ResponseEntity<WorkSpaceResponse> delete(@PathVariable("workSpaceId") String workSpaceId) {
+    @DeleteMapping("/{workSpaceIds}")
+    public ResponseEntity<DeleteWorkSpacesResponse> deleteMany(@PathVariable("workSpaceIds") List<String> workSpaceIds) {
 
-        var workSpace = this.workSpaceUseCase.findById(workSpaceId);
+        var response = new DeleteWorkSpacesResponse();
 
-        JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
+        Set<Workspace> workSpacesToDelete = new HashSet<>();
 
-        this.workSpaceUseCase.delete(workSpace);
+        for (String workSpaceId : workSpaceIds) {
 
-        return ResponseEntity.ok().build();
+            Workspace workSpace = null;
+
+            try {
+                workSpace = this.workSpaceUseCase.findById(workSpaceId);
+            } catch (WorkSpaceNotFoundException | BadRequestException ex) {
+                response.getErrorMessages().add(
+                    new DeleteWorkSpacesResponse.DeleteWorkSpaceErrorMessage(workSpaceId, ex.getMessage())
+                );
+                continue;
+            }
+
+            try {
+                JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
+            } catch (UnauthorizedException ex) {
+                response.getErrorMessages().add(
+                    new DeleteWorkSpacesResponse.DeleteWorkSpaceErrorMessage(workSpaceId, ex.getMessage())
+                );
+                continue;
+            }
+
+            workSpacesToDelete.add(workSpace);
+        }
+
+        this.workSpaceUseCase.deleteMany(workSpacesToDelete);
+
+        return ResponseEntity.ok(response);
     }
 }

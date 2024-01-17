@@ -29,6 +29,9 @@ public class Workspace extends BaseEntity {
     @Column
     private String socialCompanyName;
 
+    @Column(columnDefinition = "bool default FALSE", nullable = false)
+    private boolean isFavorite;
+
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
@@ -57,6 +60,10 @@ public class Workspace extends BaseEntity {
 
         if(updateWorkSpaceRequest.getSocialCompanyName() != null) {
             updatedWorkSpace.setSocialCompanyName(updateWorkSpaceRequest.getSocialCompanyName());
+        }
+
+        if(updateWorkSpaceRequest.getIsFavorite() != null) {
+            updatedWorkSpace.setFavorite(updateWorkSpaceRequest.getIsFavorite());
         }
 
         return updatedWorkSpace;

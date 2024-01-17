@@ -22,10 +22,10 @@ public class AuthController {
         this.authenticationUseCase = authenticationUseCase;
     }
 
-    @PostMapping("/login")
+    @PostMapping
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
         return ResponseEntity.ok().body(
-                new AuthenticationResponse(this.authenticationUseCase.authenticate(request))
+            new AuthenticationResponse(this.authenticationUseCase.authenticate(request))
         );
     }
 }

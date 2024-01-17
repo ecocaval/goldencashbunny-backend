@@ -4,7 +4,7 @@ import com.goldencashbunny.demo.core.data.requests.CreateWorkSpaceRequest;
 import com.goldencashbunny.demo.core.data.requests.UpdateWorkSpaceRequest;
 import com.goldencashbunny.demo.presentation.entities.Workspace;
 
-import java.util.List;
+import java.util.Set;
 
 public interface WorkSpaceUseCase {
 
@@ -14,7 +14,7 @@ public interface WorkSpaceUseCase {
 
     Workspace update(UpdateWorkSpaceRequest request, Workspace nonUpdatedWorkSpace);
 
-    void delete(Workspace workSpace);
+    void deleteMany(Set<Workspace> workSpaces);
 
-    List<Workspace> findWorkSpacesByAccountId(String accountId);
+    Set<Workspace> findWorkSpacesByAccountId(String accountId);
 }
