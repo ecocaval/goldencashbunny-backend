@@ -15,9 +15,7 @@ import java.util.UUID;
 public interface SpaceTableColumnRepository extends JpaRepository<SpaceTableColumn, UUID> {
 
     @Query("SELECT MAX(s.columnReference) FROM SpaceTableColumn s WHERE s.spaceTable = :spaceTable")
-    Integer findMaxValueOfColumnReference(@Param("spaceTableId") SpaceTable spaceTable);
-
-    SpaceTableColumn findByColumnReference(Integer columnReference);
+    Integer findMaxValueOfColumnReferenceByTable(@Param("spaceTableId") SpaceTable spaceTable);
 
     List<SpaceTableColumn> findBySpaceTableIdAndColumnReferenceNotIn(UUID spaceTableId, Collection<Integer> columnReference);
 }

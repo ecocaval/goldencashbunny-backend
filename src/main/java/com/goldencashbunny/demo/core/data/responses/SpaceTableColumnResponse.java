@@ -22,7 +22,7 @@ public class SpaceTableColumnResponse {
 
     private Integer columnReference;
 
-    private List<SpaceTableColumnData> data;
+    private List<SpaceTableColumnDataResponse> rows;
 
     private String columnType;
 
@@ -31,7 +31,8 @@ public class SpaceTableColumnResponse {
                 .id(column.getId())
                 .name(column.getName())
                 .columnReference(column.getColumnReference())
-                .data(column.getSpaceTableColumnData())
+                .rows(column.getSpaceTableColumnData() != null ?
+                        column.getSpaceTableColumnData().stream().map(SpaceTableColumnDataResponse::fromSpaceTableColumnData).toList() : null)
                 .columnType(column.getColumnType().name())
                 .build();
     }

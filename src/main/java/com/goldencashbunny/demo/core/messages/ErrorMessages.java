@@ -22,6 +22,7 @@ public enum ErrorMessages {
     ERROR_ACCOUNT_DUPLICATED_BY_CNPJ("Já existe uma conta registrada com este cnpj."),
     ERROR_ACCOUNT_INVALID_LOGIN("Não encontramos uma conta para o login fornecido."),
     ERROR_INVALID_COLUMN_REFERENCE("A referencia da coluna informada não está entre os valores permitidos."),
+    ERROR_INVALID_ROW_REFERENCE("A referencia da linha da coluna informada não está entre os valores permitidos."),
     ERROR_INVALID_WORKSPACE_ID("O id do workspace é inválido."),
     ERROR_INVALID_SPACE_ID("O id do space é inválido."),
     ERROR_INVALID_SPACE_TABLE_ID("O id do space table é inválido."),
@@ -32,6 +33,7 @@ public enum ErrorMessages {
     ERROR_SPACE_NOT_FOUND_BY_ID("O space com este id não foi encontrada."),
     ERROR_SPACE_TABLE_NOT_FOUND_BY_ID("O tabela com este id não foi encontrada."),
     ERROR_SPACE_TABLE_COLUMN_NOT_FOUND_BY_ID("A coluna da tabela com este id não foi encontrada."),
+    ERROR_INVALID_VALUE_FOR_COLUMN_TYPE("Este valor não pode ser atribuido a tabela, pois difere-se do tipo da coluna."),
     ERROR_INVALID_TOKEN("Por favor, envie um token válido para acessar este recurso."),
     ;
 

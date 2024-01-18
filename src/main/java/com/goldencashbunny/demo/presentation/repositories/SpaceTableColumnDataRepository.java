@@ -8,4 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface SpaceTableColumnDataRepository extends JpaRepository<SpaceTableColumnData, UUID> {
+
+    boolean existsByRowReferenceAndSpaceTableColumnId(Integer rowReference, UUID spaceTableColumnId);
 }

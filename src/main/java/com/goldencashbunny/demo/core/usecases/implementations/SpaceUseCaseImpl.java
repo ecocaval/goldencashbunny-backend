@@ -1,17 +1,16 @@
 package com.goldencashbunny.demo.core.usecases.implementations;
 
+import com.goldencashbunny.demo.core.data.enums.LoginIdentification;
+import com.goldencashbunny.demo.core.data.enums.SpaceTableColumnType;
 import com.goldencashbunny.demo.core.data.requests.*;
 import com.goldencashbunny.demo.core.messages.ErrorMessages;
 import com.goldencashbunny.demo.core.usecases.SpaceUseCase;
+import com.goldencashbunny.demo.core.utils.SpaceTableUtils;
 import com.goldencashbunny.demo.core.utils.UuidUtils;
-import com.goldencashbunny.demo.presentation.entities.Space;
-import com.goldencashbunny.demo.presentation.entities.SpaceTable;
-import com.goldencashbunny.demo.presentation.entities.SpaceTableColumn;
-import com.goldencashbunny.demo.presentation.entities.Workspace;
-import com.goldencashbunny.demo.presentation.exceptions.InvalidColumnReferenceException;
-import com.goldencashbunny.demo.presentation.exceptions.SpaceNotFoundException;
-import com.goldencashbunny.demo.presentation.exceptions.SpaceTableNotFoundException;
+import com.goldencashbunny.demo.presentation.entities.*;
+import com.goldencashbunny.demo.presentation.exceptions.*;
 import com.goldencashbunny.demo.presentation.repositories.SpaceRepository;
+import com.goldencashbunny.demo.presentation.repositories.SpaceTableColumnDataRepository;
 import com.goldencashbunny.demo.presentation.repositories.SpaceTableColumnRepository;
 import com.goldencashbunny.demo.presentation.repositories.SpaceTableRepository;
 import jakarta.transaction.Transactional;
@@ -31,15 +30,19 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
     private final SpaceTableColumnRepository spaceTableColumnRepository;
 
+    private final SpaceTableColumnDataRepository spaceTableColumnDataRepository;
+
     @Autowired
     public SpaceUseCaseImpl(
             SpaceRepository spaceRepository,
             SpaceTableRepository spaceTableRepository,
-            SpaceTableColumnRepository spaceTableColumnRepository
+            SpaceTableColumnRepository spaceTableColumnRepository,
+            SpaceTableColumnDataRepository spaceTableColumnDataRepository
     ) {
         this.spaceRepository = spaceRepository;
         this.spaceTableRepository = spaceTableRepository;
         this.spaceTableColumnRepository = spaceTableColumnRepository;
+        this.spaceTableColumnDataRepository = spaceTableColumnDataRepository;
     }
 
     @Override
@@ -122,7 +125,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         var column = SpaceTableColumn.fromCreateSpaceTableColumnRequest(request, table);
 
-        var columnReference = this.spaceTableColumnRepository.findMaxValueOfColumnReference(table);
+        var columnReference = this.spaceTableColumnRepository.findMaxValueOfColumnReferenceByTable(table);
 
         if(columnReference != null) {
             columnReference++;
@@ -173,9 +176,32 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
         return this.spaceTableColumnRepository.saveAll(allRemainingColumns);
     }
 
+    @Override
+    @Transactional
+    public SpaceTableColumnData createColumnData(CreateSpaceTableColumnDataRequest request, SpaceTableColumn column) {
+
+        if(request.getRowReference() < 0) {
+            throw new InvalidRowReferenceException(ErrorMessages.ERROR_INVALID_ROW_REFERENCE.getMessage());
+        }
+
+        var rowIsAlreadyOccupied = this.spaceTableColumnDataRepository.existsByRowReferenceAndSpaceTableColumnId(
+                request.getRowReference(), column.getId()
+        );
+
+        if(rowIsAlreadyOccupied) {
+            throw new InvalidRowReferenceException(ErrorMessages.ERROR_INVALID_ROW_REFERENCE.getMessage());
+        }
+
+        validateValueAccordingToColumnType(request.getValue(), column.getColumnType());
+
+        adjustValueAccordingToColumnType(request, column.getColumnType());
+
+        return this.spaceTableColumnDataRepository.save(SpaceTableColumnData.fromCreateSpaceTableColumnRequest(request, column));
+    }
+
     private void validateUpdatedColumnReference(Integer columnReference, SpaceTableColumn nonUpdatedColumn) {
 
-        var columnReferenceMaxValue = this.spaceTableColumnRepository.findMaxValueOfColumnReference(
+        var columnReferenceMaxValue = this.spaceTableColumnRepository.findMaxValueOfColumnReferenceByTable(
                 nonUpdatedColumn.getSpaceTable()
         );
 
@@ -208,5 +234,41 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
             if(column.getColumnReference() > deletedColumn.getColumnReference())
                 column.setColumnReference(column.getColumnReference() - 1);
         });
+    }
+
+    private void validateValueAccordingToColumnType(String value, SpaceTableColumnType columnType) {
+
+        switch (columnType) {
+
+            case CHECKBOX:
+                if(!SpaceTableUtils.checkIfValueIsBoolean(value))
+                    throw new InvalidValueForColumnTypeException(
+                        ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
+                    );
+                break;
+
+            case DATE:
+                if(!SpaceTableUtils.checkIfValueIsDate(value))
+                    throw new InvalidValueForColumnTypeException(
+                        ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
+                    );
+                break;
+
+            case NUMBER:
+                if(!SpaceTableUtils.checkIfValueIsNumber(value))
+                    throw new InvalidValueForColumnTypeException(
+                        ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
+                    );
+                break;
+
+            // case TEXT: if the value is text anything will be accepted as value...
+        };
+    }
+
+    private void adjustValueAccordingToColumnType(CreateSpaceTableColumnDataRequest request, SpaceTableColumnType columnType) {
+        switch (columnType) {
+            case DATE -> request.setValue(SpaceTableUtils.convertStringToDefaultDatePattern(request.getValue()));
+            case CHECKBOX -> request.setValue(Boolean.valueOf(request.getValue()).toString());
+        };
     }
 }

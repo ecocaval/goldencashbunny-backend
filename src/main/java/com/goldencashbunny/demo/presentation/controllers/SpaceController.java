@@ -7,6 +7,7 @@ import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.infra.security.JwtUtils;
 import com.goldencashbunny.demo.presentation.entities.Space;
 import com.goldencashbunny.demo.presentation.entities.SpaceTable;
+import com.goldencashbunny.demo.presentation.entities.SpaceTableColumnData;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceTableNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.base.BadRequestException;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("v1/space")
+@RequestMapping("v1")
 public class SpaceController {
 
     private final WorkSpaceUseCase workSpaceUseCase;
@@ -35,7 +36,7 @@ public class SpaceController {
         this.spaceUseCase = spaceUseCase;
     }
 
-    @GetMapping("/workspace/{workSpaceId}")
+    @GetMapping("/workspace/{workSpaceId}/spaces")
     public ResponseEntity<List<SpaceResponse>> findByWorkSpaceId(@PathVariable("workSpaceId") String workSpaceId) {
 
         var workSpace = this.workSpaceUseCase.findById(workSpaceId);
@@ -49,7 +50,7 @@ public class SpaceController {
         );
     }
 
-    @PostMapping("/workspace/{workSpaceId}")
+    @PostMapping("/workspace/{workSpaceId}/space")
     public ResponseEntity<SpaceResponse> create(
             @PathVariable("workSpaceId") String workSpaceId,
             @RequestBody @Valid CreateSpaceRequest request
@@ -63,7 +64,7 @@ public class SpaceController {
         );
     }
 
-    @PatchMapping("/{spaceId}")
+    @PatchMapping("space/{spaceId}")
     public ResponseEntity<SpaceResponse> update(
             @PathVariable("spaceId") String spaceId,
             @RequestBody UpdateSpaceRequest request
@@ -77,7 +78,7 @@ public class SpaceController {
         );
     }
 
-    @DeleteMapping("/{spaceIds}")
+    @DeleteMapping("spaces/{spaceIds}")
     public ResponseEntity<DeleteSpacesResponse> deleteMany(@PathVariable("spaceIds") List<String> spaceIds) {
 
         var response = new DeleteSpacesResponse();
@@ -114,7 +115,7 @@ public class SpaceController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{spaceId}/table")
+    @PostMapping("space/{spaceId}/table")
     public ResponseEntity<SpaceTableResponse> createTable(
             @PathVariable("spaceId") String spaceId,
             @RequestBody @Valid CreateSpaceTableRequest request
@@ -128,7 +129,7 @@ public class SpaceController {
         );
     }
 
-    @PatchMapping("/table/{tableId}")
+    @PatchMapping("space/table/{tableId}")
     public ResponseEntity<SpaceTableResponse> updateTable(
             @PathVariable("tableId") String tableId,
             @RequestBody UpdateSpaceTableRequest request
@@ -142,7 +143,7 @@ public class SpaceController {
         );
     }
 
-    @DeleteMapping("/table/{tableIds}")
+    @DeleteMapping("space/tables/{tableIds}")
     public ResponseEntity<DeleteSpaceTablesResponse> deleteManyTables(@PathVariable("tableIds") List<String> tableIds) {
 
         var response = new DeleteSpaceTablesResponse();
@@ -180,7 +181,7 @@ public class SpaceController {
     }
 
 
-    @PostMapping("table/{tableId}/column")
+    @PostMapping("/space/table/{tableId}/column")
     public ResponseEntity<SpaceTableColumnResponse> createTableColumn(
             @PathVariable("tableId") String tableId,
             @RequestBody @Valid CreateSpaceTableColumnRequest request
@@ -194,7 +195,7 @@ public class SpaceController {
         );
     }
 
-    @PatchMapping("/column/{columnId}")
+    @PatchMapping("/space/table/column/{columnId}")
     public ResponseEntity<List<SpaceTableColumnResponse>> updateTableColumn(
             @PathVariable("columnId") String columnId,
             @RequestBody @Valid UpdateSpaceTableColumnRequest request
@@ -203,7 +204,7 @@ public class SpaceController {
 
         JwtUtils.validateAdminRoleOrSameAccount(column.getSpaceTable().getSpace().getWorkspace().getAccount().getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
+        return ResponseEntity.status(HttpStatus.OK).body(
                 this.spaceUseCase.updateColumn(request, column)
                         .stream()
                         .map(SpaceTableColumnResponse::fromSpaceTableColumn)
@@ -211,7 +212,7 @@ public class SpaceController {
         );
     }
 
-    @DeleteMapping("/column/{columnId}")
+    @DeleteMapping("/space/table/column/{columnId}")
     public ResponseEntity<List<SpaceTableColumnResponse>> deleteTableColumn(
             @PathVariable("columnId") String columnId
     ) {
@@ -219,12 +220,40 @@ public class SpaceController {
 
         JwtUtils.validateAdminRoleOrSameAccount(column.getSpaceTable().getSpace().getWorkspace().getAccount().getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
+        return ResponseEntity.status(HttpStatus.OK).body(
                 this.spaceUseCase.deleteColumn(column)
                         .stream()
                         .map(SpaceTableColumnResponse::fromSpaceTableColumn)
                         .toList()
         );
     }
+
+    @PostMapping("/space/table/column/{columnId}/data")
+    public ResponseEntity<SpaceTableColumnDataResponse> createTableColumData(
+            @PathVariable("columnId") String columnId,
+            @RequestBody @Valid CreateSpaceTableColumnDataRequest request
+    ) {
+        var column = this.spaceUseCase.findColumnById(columnId);
+
+        JwtUtils.validateAdminRoleOrSameAccount(column.getSpaceTable().getSpace().getWorkspace().getAccount().getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            SpaceTableColumnDataResponse.fromSpaceTableColumnData(this.spaceUseCase.createColumnData(request, column))
+        );
+    }
+
+//    @PatchMapping("space/table/{tableId}/rows")
+//    public ResponseEntity<SpaceTableResponse> updateTableRowsPositions(
+//            @PathVariable("tableId") String tableId,
+//            @RequestBody UpdateSpaceTableRequest request
+//    ) {
+//        var table = this.spaceUseCase.findTableById(tableId);
+//
+//        JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(
+//                SpaceTableResponse.fromSpaceTable(this.spaceUseCase.updateTable(request, table))
+//        );
+//    }
 
 }

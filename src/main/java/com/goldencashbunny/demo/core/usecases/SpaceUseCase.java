@@ -1,10 +1,7 @@
 package com.goldencashbunny.demo.core.usecases;
 
 import com.goldencashbunny.demo.core.data.requests.*;
-import com.goldencashbunny.demo.presentation.entities.Space;
-import com.goldencashbunny.demo.presentation.entities.SpaceTable;
-import com.goldencashbunny.demo.presentation.entities.SpaceTableColumn;
-import com.goldencashbunny.demo.presentation.entities.Workspace;
+import com.goldencashbunny.demo.presentation.entities.*;
 
 import java.util.List;
 import java.util.Set;
@@ -36,4 +33,6 @@ public interface SpaceUseCase {
     List<SpaceTableColumn> updateColumn(UpdateSpaceTableColumnRequest request, SpaceTableColumn nonUpdatedColumn);
 
     List<SpaceTableColumn> deleteColumn(SpaceTableColumn column);
+
+    SpaceTableColumnData createColumnData(CreateSpaceTableColumnDataRequest request, SpaceTableColumn column);
 }

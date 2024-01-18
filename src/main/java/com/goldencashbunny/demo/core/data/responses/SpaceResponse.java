@@ -1,7 +1,6 @@
 package com.goldencashbunny.demo.core.data.responses;
 
 import com.goldencashbunny.demo.presentation.entities.Space;
-import com.goldencashbunny.demo.presentation.entities.SpaceTable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,14 +19,14 @@ public class SpaceResponse {
 
     private boolean isFavorite;
 
-    private List<SpaceTableResponse> spaceTables;
+    private List<SpaceTableResponse> tables;
 
     public static SpaceResponse fromSpace(Space space) {
         return SpaceResponse.builder()
                 .id(space.getId())
                 .name(space.getName())
                 .isFavorite(space.isFavorite())
-                .spaceTables(space.getSpaceTables() != null ? space.getSpaceTables().stream().map(SpaceTableResponse::fromSpaceTable).toList() : null)
+                .tables(space.getSpaceTables() != null ? space.getSpaceTables().stream().map(SpaceTableResponse::fromSpaceTable).toList() : null)
                 .build();
     }
 }
