@@ -7,6 +7,8 @@ import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.List;
 @SuperBuilder
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE space_table_column SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class SpaceTableColumn extends BaseEntity {
 
     @Column(nullable = false)
@@ -30,7 +34,7 @@ public class SpaceTableColumn extends BaseEntity {
     private SpaceTable spaceTable;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "spaceTableColumn")
-    private List<SpaceTableColumnRow> spaceTableColumnData;
+    private List<SpaceTableColumnRow> spaceTableColumnRows;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -41,7 +45,7 @@ public class SpaceTableColumn extends BaseEntity {
         this.name = column.name;
         this.columnReference = column.columnReference;
         this.spaceTable = column.spaceTable;
-        this.spaceTableColumnData = column.spaceTableColumnData;
+        this.spaceTableColumnRows = column.spaceTableColumnRows;
         this.columnType = column.columnType;
     }
 

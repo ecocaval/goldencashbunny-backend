@@ -18,4 +18,8 @@ public interface SpaceTableColumnRepository extends JpaRepository<SpaceTableColu
     Integer findMaxValueOfColumnReferenceByTable(@Param("spaceTableId") SpaceTable spaceTable);
 
     List<SpaceTableColumn> findBySpaceTableIdAndColumnReferenceNotIn(UUID spaceTableId, Collection<Integer> columnReference);
+
+    List<SpaceTableColumn> findBySpaceTableIdAndColumnReferenceNotInOrderByColumnReferenceAsc(
+            UUID spaceTableId, Collection<Integer> columnReference
+    );
 }

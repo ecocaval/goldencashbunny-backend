@@ -6,6 +6,8 @@ import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.List;
 @SuperBuilder
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE space_table SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class SpaceTable extends BaseEntity {
 
     @Column(nullable = false)

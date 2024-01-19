@@ -2,7 +2,7 @@ package com.goldencashbunny.demo.presentation.controllers;
 
 import com.goldencashbunny.demo.core.data.requests.CreateWorkSpaceRequest;
 import com.goldencashbunny.demo.core.data.requests.UpdateWorkSpaceRequest;
-import com.goldencashbunny.demo.core.data.responses.DeleteWorkSpacesResponse;
+import com.goldencashbunny.demo.core.data.responses.DeleteManyResponse;
 import com.goldencashbunny.demo.core.data.responses.WorkSpaceResponse;
 import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.infra.security.JwtUtils;
@@ -73,9 +73,9 @@ public class WorkSpaceController {
     }
 
     @DeleteMapping("/{workSpaceIds}")
-    public ResponseEntity<DeleteWorkSpacesResponse> deleteMany(@PathVariable("workSpaceIds") List<String> workSpaceIds) {
+    public ResponseEntity<DeleteManyResponse> deleteMany(@PathVariable("workSpaceIds") List<String> workSpaceIds) {
 
-        var response = new DeleteWorkSpacesResponse();
+        var response = new DeleteManyResponse();
 
         Set<Workspace> workSpacesToDelete = new HashSet<>();
 
@@ -87,7 +87,7 @@ public class WorkSpaceController {
                 workSpace = this.workSpaceUseCase.findById(workSpaceId);
             } catch (WorkSpaceNotFoundException | BadRequestException ex) {
                 response.getErrorMessages().add(
-                    new DeleteWorkSpacesResponse.DeleteWorkSpaceErrorMessage(workSpaceId, ex.getMessage())
+                    new DeleteManyResponse.DeleteErrorMessage(workSpaceId, ex.getMessage())
                 );
                 continue;
             }
@@ -96,7 +96,7 @@ public class WorkSpaceController {
                 JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
             } catch (UnauthorizedException ex) {
                 response.getErrorMessages().add(
-                    new DeleteWorkSpacesResponse.DeleteWorkSpaceErrorMessage(workSpaceId, ex.getMessage())
+                    new DeleteManyResponse.DeleteErrorMessage(workSpaceId, ex.getMessage())
                 );
                 continue;
             }

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +28,15 @@ public class SpaceTableResponse {
         return SpaceTableResponse.builder()
                 .id(spaceTable.getId())
                 .name(spaceTable.getName())
-                .columns(spaceTable.getColumns() != null ? spaceTable.getColumns().stream().map(SpaceTableColumnResponse::fromSpaceTableColumn).toList() : null)
+                .columns(
+                        spaceTable.getColumns() != null ?
+                                spaceTable.getColumns()
+                                        .stream()
+                                        .map(SpaceTableColumnResponse::fromSpaceTableColumn)
+                                        .sorted(Comparator.comparing(SpaceTableColumnResponse::getColumnReference))
+                                        .toList()
+                                : null
+                )
                 .build();
     }
 }

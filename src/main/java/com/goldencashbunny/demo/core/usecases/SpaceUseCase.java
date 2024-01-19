@@ -32,7 +32,16 @@ public interface SpaceUseCase {
 
     List<SpaceTableColumn> updateColumn(UpdateSpaceTableColumnRequest request, SpaceTableColumn nonUpdatedColumn);
 
-    List<SpaceTableColumn> deleteColumn(SpaceTableColumn column);
+    void deleteManyColumns(Set<SpaceTableColumn> columns);
+
+    SpaceTableColumnRow findColumnRowById(String rowId);
 
     SpaceTableColumnRow createColumnRow(CreateSpaceTableColumnRowRequest request, SpaceTableColumn column);
+
+    SpaceTableColumnRow updateColumnRow(UpdateSpaceTableColumnRowRequest request, SpaceTableColumnRow nonUpdatedColumnRow);
+
+    SpaceTable updateTableRowsReference(UpdateSpaceTableColumnRowReferenceRequest request, SpaceTable table);
+
+//    void deleteManyColumnRows(Set<SpaceTableColumnRow> columnRows);
+
 }

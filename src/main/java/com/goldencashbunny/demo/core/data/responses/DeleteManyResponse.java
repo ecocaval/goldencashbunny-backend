@@ -12,17 +12,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class DeleteSpacesResponse {
+public class DeleteManyResponse {
 
-    private List<DeleteSpaceErrorMessage> errorMessages = new ArrayList<>();
+    private List<DeleteErrorMessage> errorMessages = new ArrayList<>();
 
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    public static class DeleteSpaceErrorMessage {
+    public static class DeleteErrorMessage {
 
-        private String spaceId;
+        private String id;
         private String details;
     }
 }

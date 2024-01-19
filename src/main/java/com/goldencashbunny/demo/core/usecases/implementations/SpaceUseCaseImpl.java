@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -71,13 +72,18 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
     public Space findById(String spaceId) {
 
         return this.spaceRepository.findById(
-            UuidUtils.getValidUuidFromString(spaceId, ErrorMessages.ERROR_INVALID_SPACE_ID.getMessage())
+                UuidUtils.getValidUuidFromString(spaceId, ErrorMessages.ERROR_INVALID_SPACE_ID.getMessage())
         ).orElseThrow(() -> new SpaceNotFoundException(ErrorMessages.ERROR_SPACE_NOT_FOUND_BY_ID.getMessage()));
     }
 
     @Override
     @Transactional
     public void deleteMany(Set<Space> spaces) {
+
+        if (spaces.isEmpty()) {
+            return;
+        }
+
         this.spaceRepository.deleteAll(spaces);
     }
 
@@ -107,6 +113,11 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
     @Override
     @Transactional
     public void deleteManyTables(Set<SpaceTable> spaceTables) {
+
+        if (spaceTables.isEmpty()) {
+            return;
+        }
+
         this.spaceTableRepository.deleteAll(spaceTables);
     }
 
@@ -115,7 +126,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         return this.spaceTableColumnRepository.findById(
                 UuidUtils.getValidUuidFromString(columnId, ErrorMessages.ERROR_INVALID_SPACE_TABLE_COLUMN_ID.getMessage())
-        ).orElseThrow(() -> new SpaceNotFoundException(ErrorMessages.ERROR_SPACE_TABLE_COLUMN_NOT_FOUND_BY_ID.getMessage()));
+        ).orElseThrow(() -> new SpaceTableColumnNotFoundException(ErrorMessages.ERROR_SPACE_TABLE_COLUMN_NOT_FOUND_BY_ID.getMessage()));
     }
 
     @Override
@@ -126,7 +137,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         var columnReference = this.spaceTableColumnRepository.findMaxValueOfColumnReferenceByTable(table);
 
-        if(columnReference != null) {
+        if (columnReference != null) {
             columnReference++;
         } else {
             columnReference = 0;
@@ -143,17 +154,17 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         var updatedColumn = SpaceTableColumn.fromUpdateSpaceTableColumnRequest(request, nonUpdatedColumn);
 
-        if(request.getColumnReference() == null) {
+        if (request.getColumnReference() == null) {
             return List.of(this.spaceTableColumnRepository.save(updatedColumn));
         }
 
         validateUpdatedColumnReference(request.getColumnReference(), nonUpdatedColumn);
 
         var allRemainingColumns = this.spaceTableColumnRepository.findBySpaceTableIdAndColumnReferenceNotIn(
-            updatedColumn.getSpaceTable().getId(), Collections.singleton(nonUpdatedColumn.getColumnReference())
+                updatedColumn.getSpaceTable().getId(), Collections.singleton(nonUpdatedColumn.getColumnReference())
         );
 
-        adjustColumnsDueToUpdate(updatedColumn, nonUpdatedColumn, allRemainingColumns);
+        adjustColumnsReferencesDueToUpdate(updatedColumn, nonUpdatedColumn, allRemainingColumns);
 
         allRemainingColumns.add(updatedColumn);
 
@@ -162,24 +173,39 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
     @Override
     @Transactional
-    public List<SpaceTableColumn> deleteColumn(SpaceTableColumn column) {
+    public void deleteManyColumns(Set<SpaceTableColumn> columns) {
 
-        var allRemainingColumns = this.spaceTableColumnRepository.findBySpaceTableIdAndColumnReferenceNotIn(
-            column.getSpaceTable().getId(), Collections.singleton(column.getColumnReference())
-        );
+        if (columns.isEmpty()) {
+            return;
+        }
 
-        this.spaceTableColumnRepository.delete(column);
+        var allRemainingColumnsSortedByColumnReference =
+                this.spaceTableColumnRepository.findBySpaceTableIdAndColumnReferenceNotInOrderByColumnReferenceAsc(
+                        columns.stream().toList().get(0).getSpaceTable().getId(),
+                        columns.stream().map(SpaceTableColumn::getColumnReference).toList()
+                );
 
-        adjustColumnsDueToDelete(column, allRemainingColumns);
+        this.spaceTableColumnRepository.deleteAll(columns);
 
-        return this.spaceTableColumnRepository.saveAll(allRemainingColumns);
+        adjustColumnsReferencesDueToDelete(allRemainingColumnsSortedByColumnReference);
+
+        this.spaceTableColumnRepository.saveAll(allRemainingColumnsSortedByColumnReference);
     }
+
+    @Override
+    public SpaceTableColumnRow findColumnRowById(String rowId) {
+
+        return this.spaceTableColumnRowRepository.findById(
+                UuidUtils.getValidUuidFromString(rowId, ErrorMessages.ERROR_INVALID_SPACE_TABLE_COLUMN_ROW_ID.getMessage())
+        ).orElseThrow(() -> new SpaceTableColumnRowNotFoundException(ErrorMessages.ERROR_SPACE_TABLE_COLUMN_ROW_NOT_FOUND_BY_ID.getMessage()));
+    }
+
 
     @Override
     @Transactional
     public SpaceTableColumnRow createColumnRow(CreateSpaceTableColumnRowRequest request, SpaceTableColumn column) {
 
-        if(request.getRowReference() < 0) {
+        if (request.getRowReference() < 0) {
             throw new InvalidRowReferenceException(ErrorMessages.ERROR_INVALID_ROW_REFERENCE.getMessage());
         }
 
@@ -187,15 +213,70 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
                 request.getRowReference(), column.getId()
         );
 
-        if(rowIsAlreadyOccupied) {
+        if (rowIsAlreadyOccupied) {
             throw new InvalidRowReferenceException(ErrorMessages.ERROR_INVALID_ROW_REFERENCE.getMessage());
         }
 
         validateValueAccordingToColumnType(request.getValue(), column.getColumnType());
 
-        adjustValueAccordingToColumnType(request, column.getColumnType());
+        request.setValue(adjustValueAccordingToColumnType(request.getValue(), column.getColumnType()));
 
         return this.spaceTableColumnRowRepository.save(SpaceTableColumnRow.fromCreateSpaceTableColumnRowRequest(request, column));
+    }
+
+    @Override
+    @Transactional
+    public SpaceTableColumnRow updateColumnRow(
+            UpdateSpaceTableColumnRowRequest request, SpaceTableColumnRow nonUpdatedColumnRow
+    ) {
+        validateValueAccordingToColumnType(
+                request.getValue(), nonUpdatedColumnRow.getSpaceTableColumn().getColumnType()
+        );
+
+        request.setValue(adjustValueAccordingToColumnType(
+                request.getValue(), nonUpdatedColumnRow.getSpaceTableColumn().getColumnType())
+        );
+
+        return this.spaceTableColumnRowRepository.save(
+                SpaceTableColumnRow.fromUpdateSpaceTableColumnRowRequest(request, nonUpdatedColumnRow)
+        );
+    }
+
+    @Override
+    @Transactional
+    public SpaceTable updateTableRowsReference(
+            UpdateSpaceTableColumnRowReferenceRequest request, SpaceTable table
+    ) {
+        int oldRowReference = request.getFrom();
+        int newRowReference = request.getTo();
+
+        List<SpaceTableColumnRow> rowsWithOldRowReference = new ArrayList<>();
+
+        List<SpaceTableColumnRow> allRemainingRows = new ArrayList<>();
+
+        for (SpaceTableColumn column : table.getColumns()) {
+
+            for (SpaceTableColumnRow row : column.getSpaceTableColumnRows()) {
+
+                if (row.getRowReference().equals(oldRowReference)) {
+                    rowsWithOldRowReference.add(row);
+                } else {
+                    allRemainingRows.add(row);
+                }
+            }
+        }
+
+        if (rowsWithOldRowReference.isEmpty()) {
+            throw new InvalidRowReferenceException(ErrorMessages.ERROR_INVALID_FROM_ROW_REFERENCE.getMessage());
+        }
+
+        rowsWithOldRowReference.forEach(row -> row.setRowReference(newRowReference));
+
+        adjustRowsReferencesDueToUpdate(newRowReference, oldRowReference, allRemainingRows);
+
+        return null;
+
+//        return this.spaceTableColumnRowRepository.save();
     }
 
     private void validateUpdatedColumnReference(Integer columnReference, SpaceTableColumn nonUpdatedColumn) {
@@ -204,35 +285,48 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
                 nonUpdatedColumn.getSpaceTable()
         );
 
-        if(columnReference > columnReferenceMaxValue || columnReference < 0) {
+        if (columnReference > columnReferenceMaxValue || columnReference < 0) {
             throw new InvalidColumnReferenceException(columnReference, columnReferenceMaxValue);
         }
     }
 
-    private void adjustColumnsDueToUpdate(
-        SpaceTableColumn updatedColumn, SpaceTableColumn nonUpdatedColumn, List<SpaceTableColumn> allRemainingColumns
+    private void adjustColumnsReferencesDueToUpdate(
+            SpaceTableColumn updatedColumn, SpaceTableColumn nonUpdatedColumn, List<SpaceTableColumn> allRemainingColumns
     ) {
-        if(updatedColumn.getColumnReference() < nonUpdatedColumn.getColumnReference()) {
+        if (updatedColumn.getColumnReference() < nonUpdatedColumn.getColumnReference()) {
             allRemainingColumns.forEach(column -> {
-                if(column.getColumnReference() >= updatedColumn.getColumnReference() && column.getColumnReference() < nonUpdatedColumn.getColumnReference())
+                if (column.getColumnReference() >= updatedColumn.getColumnReference() && column.getColumnReference() < nonUpdatedColumn.getColumnReference())
                     column.setColumnReference(column.getColumnReference() + 1);
             });
 
         } else {
             allRemainingColumns.forEach(column -> {
-                if(column.getColumnReference() <= updatedColumn.getColumnReference() && column.getColumnReference() > nonUpdatedColumn.getColumnReference())
+                if (column.getColumnReference() <= updatedColumn.getColumnReference() && column.getColumnReference() > nonUpdatedColumn.getColumnReference())
                     column.setColumnReference(column.getColumnReference() - 1);
             });
         }
     }
 
-    private void adjustColumnsDueToDelete(
-        SpaceTableColumn deletedColumn, List<SpaceTableColumn> allRemainingColumns
+    private void adjustColumnsReferencesDueToDelete(
+            List<SpaceTableColumn> allRemainingColumnsSortedByColumnReference
     ) {
-        allRemainingColumns.forEach(column -> {
-            if(column.getColumnReference() > deletedColumn.getColumnReference())
-                column.setColumnReference(column.getColumnReference() - 1);
-        });
+        for (int i = 0; i < allRemainingColumnsSortedByColumnReference.size(); i++) {
+
+            int newColumnReference = allRemainingColumnsSortedByColumnReference.get(i).getColumnReference();
+
+            if (i == 0) {
+                while (newColumnReference > 0) {
+                    newColumnReference--;
+                }
+                allRemainingColumnsSortedByColumnReference.get(i).setColumnReference(newColumnReference);
+
+            } else {
+                while (newColumnReference > allRemainingColumnsSortedByColumnReference.get(i - 1).getColumnReference() + 1) {
+                    newColumnReference--;
+                }
+                allRemainingColumnsSortedByColumnReference.get(i).setColumnReference(newColumnReference);
+            }
+        }
     }
 
     private void validateValueAccordingToColumnType(String value, SpaceTableColumnType columnType) {
@@ -240,34 +334,59 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
         switch (columnType) {
 
             case CHECKBOX:
-                if(!SpaceTableUtils.checkIfValueIsBoolean(value))
+                if (!SpaceTableUtils.checkIfValueIsBoolean(value))
                     throw new InvalidValueForColumnTypeException(
-                        ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
+                            ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
                     );
                 break;
 
             case DATE:
-                if(!SpaceTableUtils.checkIfValueIsDate(value))
+                if (!SpaceTableUtils.checkIfValueIsDate(value))
                     throw new InvalidValueForColumnTypeException(
-                        ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
+                            ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
                     );
                 break;
 
             case NUMBER:
-                if(!SpaceTableUtils.checkIfValueIsNumber(value))
+                if (!SpaceTableUtils.checkIfValueIsNumber(value))
                     throw new InvalidValueForColumnTypeException(
-                        ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
+                            ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
                     );
                 break;
 
             // case TEXT: if the value is text anything will be accepted as value...
-        };
+        }
+        ;
     }
 
-    private void adjustValueAccordingToColumnType(CreateSpaceTableColumnRowRequest request, SpaceTableColumnType columnType) {
+    private String adjustValueAccordingToColumnType(String value, SpaceTableColumnType columnType) {
         switch (columnType) {
-            case DATE -> request.setValue(SpaceTableUtils.convertStringToDefaultDatePattern(request.getValue()));
-            case CHECKBOX -> request.setValue(Boolean.valueOf(request.getValue()).toString());
-        };
+            case DATE -> {
+                return SpaceTableUtils.convertStringToDefaultDatePattern(value);
+            }
+            case CHECKBOX -> {
+                return Boolean.valueOf(value).toString();
+            }
+            default -> {
+                return value;
+            }
+        }
+    }
+
+    private void adjustRowsReferencesDueToUpdate(
+            int newRowReference, int oldRowReference, List<SpaceTableColumnRow> allRemainingRows
+    ) {
+        if (newRowReference < oldRowReference) {
+            allRemainingRows.forEach(row -> {
+                if (row.getRowReference() >= row.getRowReference() && row.getRowReference() < row.getRowReference())
+                    row.setRowReference(row.getRowReference() + 1);
+            });
+
+        } else {
+            allRemainingRows.forEach(row -> {
+                if (row.getRowReference() <= row.getRowReference() && row.getRowReference() > row.getRowReference())
+                    row.setRowReference(row.getRowReference() - 1);
+            });
+        }
     }
 }

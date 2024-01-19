@@ -1,10 +1,14 @@
 package com.goldencashbunny.demo.presentation.entities;
 
 import com.goldencashbunny.demo.core.data.requests.CreateSpaceTableColumnRowRequest;
+import com.goldencashbunny.demo.core.data.requests.UpdateSpaceTableColumnRequest;
+import com.goldencashbunny.demo.core.data.requests.UpdateSpaceTableColumnRowRequest;
 import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +18,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE space_table_column_row SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class SpaceTableColumnRow extends BaseEntity {
 
     @ManyToOne
@@ -43,5 +49,17 @@ public class SpaceTableColumnRow extends BaseEntity {
                 .value(request.getValue())
                 .creationDate(LocalDateTime.now())
                 .build();
+    }
+
+    public static SpaceTableColumnRow fromUpdateSpaceTableColumnRowRequest(
+            UpdateSpaceTableColumnRowRequest request, SpaceTableColumnRow nonUpdatedColumnRow
+    ) {
+        var updatedColumn = new SpaceTableColumnRow(nonUpdatedColumnRow);
+
+        if(request.getValue() != null) {
+            updatedColumn.setValue(request.getValue());
+        }
+
+        return updatedColumn;
     }
 }
