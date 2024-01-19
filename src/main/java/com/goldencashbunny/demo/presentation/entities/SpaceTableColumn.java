@@ -2,9 +2,7 @@ package com.goldencashbunny.demo.presentation.entities;
 
 import com.goldencashbunny.demo.core.data.enums.SpaceTableColumnType;
 import com.goldencashbunny.demo.core.data.requests.CreateSpaceTableColumnRequest;
-import com.goldencashbunny.demo.core.data.requests.CreateSpaceTableRequest;
 import com.goldencashbunny.demo.core.data.requests.UpdateSpaceTableColumnRequest;
-import com.goldencashbunny.demo.core.data.requests.UpdateSpaceTableRequest;
 import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,7 +30,7 @@ public class SpaceTableColumn extends BaseEntity {
     private SpaceTable spaceTable;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "spaceTableColumn")
-    private List<SpaceTableColumnData> spaceTableColumnData;
+    private List<SpaceTableColumnRow> spaceTableColumnData;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -9,8 +9,8 @@ import lombok.Data;
 @Builder
 @Data
 public class ApiExceptionResponse {
-    private String errorMessage;
-    private String timestamp;
     private String instance;
+    private String timestamp;
+    private String errorMessage;
     private Object details;
 }

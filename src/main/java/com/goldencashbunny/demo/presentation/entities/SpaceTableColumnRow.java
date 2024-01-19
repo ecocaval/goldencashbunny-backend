@@ -1,6 +1,6 @@
 package com.goldencashbunny.demo.presentation.entities;
 
-import com.goldencashbunny.demo.core.data.requests.CreateSpaceTableColumnDataRequest;
+import com.goldencashbunny.demo.core.data.requests.CreateSpaceTableColumnRowRequest;
 import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @Getter
 @Setter
-public class SpaceTableColumnData extends BaseEntity {
+public class SpaceTableColumnRow extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "space_table_column_id")
@@ -26,18 +26,18 @@ public class SpaceTableColumnData extends BaseEntity {
     @Column(nullable = false)
     private String value;
 
-    public SpaceTableColumnData(SpaceTableColumnData columnData) {
+    public SpaceTableColumnRow(SpaceTableColumnRow columnData) {
         super(columnData.getId(), columnData.getCreationDate(), columnData.getLastModifiedDate(), columnData.isDeleted());
         this.spaceTableColumn = columnData.spaceTableColumn;
         this.rowReference = columnData.rowReference;
         this.value = columnData.value;
     }
 
-    public static SpaceTableColumnData fromCreateSpaceTableColumnRequest(
-            CreateSpaceTableColumnDataRequest request,
+    public static SpaceTableColumnRow fromCreateSpaceTableColumnRowRequest(
+            CreateSpaceTableColumnRowRequest request,
             SpaceTableColumn spaceTableColumn
     ) {
-        return SpaceTableColumnData.builder()
+        return SpaceTableColumnRow.builder()
                 .spaceTableColumn(spaceTableColumn)
                 .rowReference(request.getRowReference())
                 .value(request.getValue())

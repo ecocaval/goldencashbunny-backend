@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CreateSpaceTableColumnDataRequest {
+public class CreateSpaceTableColumnRowRequest {
 
     @NotBlank(message = "A referencia da linha da coluna não pode ser vazio.")
     private Integer rowReference;

@@ -34,5 +34,5 @@ public interface SpaceUseCase {
 
     List<SpaceTableColumn> deleteColumn(SpaceTableColumn column);
 
-    SpaceTableColumnData createColumnData(CreateSpaceTableColumnDataRequest request, SpaceTableColumn column);
+    SpaceTableColumnRow createColumnRow(CreateSpaceTableColumnRowRequest request, SpaceTableColumn column);
 }

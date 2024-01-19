@@ -7,7 +7,6 @@ import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.infra.security.JwtUtils;
 import com.goldencashbunny.demo.presentation.entities.Space;
 import com.goldencashbunny.demo.presentation.entities.SpaceTable;
-import com.goldencashbunny.demo.presentation.entities.SpaceTableColumnData;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceTableNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.base.BadRequestException;
@@ -228,32 +227,18 @@ public class SpaceController {
         );
     }
 
-    @PostMapping("/space/table/column/{columnId}/data")
-    public ResponseEntity<SpaceTableColumnDataResponse> createTableColumData(
+    @PostMapping("/space/table/column/{columnId}/row")
+    public ResponseEntity<SpaceTableColumnRowResponse> createTableColumData(
             @PathVariable("columnId") String columnId,
-            @RequestBody @Valid CreateSpaceTableColumnDataRequest request
+            @RequestBody @Valid CreateSpaceTableColumnRowRequest request
     ) {
         var column = this.spaceUseCase.findColumnById(columnId);
 
         JwtUtils.validateAdminRoleOrSameAccount(column.getSpaceTable().getSpace().getWorkspace().getAccount().getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-            SpaceTableColumnDataResponse.fromSpaceTableColumnData(this.spaceUseCase.createColumnData(request, column))
+            SpaceTableColumnRowResponse.fromSpaceTableColumnRow(this.spaceUseCase.createColumnRow(request, column))
         );
     }
-
-//    @PatchMapping("space/table/{tableId}/rows")
-//    public ResponseEntity<SpaceTableResponse> updateTableRowsPositions(
-//            @PathVariable("tableId") String tableId,
-//            @RequestBody UpdateSpaceTableRequest request
-//    ) {
-//        var table = this.spaceUseCase.findTableById(tableId);
-//
-//        JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(
-//                SpaceTableResponse.fromSpaceTable(this.spaceUseCase.updateTable(request, table))
-//        );
-//    }
 
 }

@@ -1,7 +1,6 @@
 package com.goldencashbunny.demo.core.data.responses;
 
 import com.goldencashbunny.demo.presentation.entities.SpaceTableColumn;
-import com.goldencashbunny.demo.presentation.entities.SpaceTableColumnData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,18 +21,18 @@ public class SpaceTableColumnResponse {
 
     private Integer columnReference;
 
-    private List<SpaceTableColumnDataResponse> rows;
-
     private String columnType;
+
+    private List<SpaceTableColumnRowResponse> rows;
 
     public static SpaceTableColumnResponse fromSpaceTableColumn(SpaceTableColumn column) {
         return SpaceTableColumnResponse.builder()
                 .id(column.getId())
                 .name(column.getName())
                 .columnReference(column.getColumnReference())
-                .rows(column.getSpaceTableColumnData() != null ?
-                        column.getSpaceTableColumnData().stream().map(SpaceTableColumnDataResponse::fromSpaceTableColumnData).toList() : null)
                 .columnType(column.getColumnType().name())
+                .rows(column.getSpaceTableColumnData() != null ?
+                        column.getSpaceTableColumnData().stream().map(SpaceTableColumnRowResponse::fromSpaceTableColumnRow).toList() : null)
                 .build();
     }
 }

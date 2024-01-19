@@ -1,6 +1,5 @@
 package com.goldencashbunny.demo.core.usecases.implementations;
 
-import com.goldencashbunny.demo.core.data.enums.LoginIdentification;
 import com.goldencashbunny.demo.core.data.enums.SpaceTableColumnType;
 import com.goldencashbunny.demo.core.data.requests.*;
 import com.goldencashbunny.demo.core.messages.ErrorMessages;
@@ -10,7 +9,7 @@ import com.goldencashbunny.demo.core.utils.UuidUtils;
 import com.goldencashbunny.demo.presentation.entities.*;
 import com.goldencashbunny.demo.presentation.exceptions.*;
 import com.goldencashbunny.demo.presentation.repositories.SpaceRepository;
-import com.goldencashbunny.demo.presentation.repositories.SpaceTableColumnDataRepository;
+import com.goldencashbunny.demo.presentation.repositories.SpaceTableColumnRowRepository;
 import com.goldencashbunny.demo.presentation.repositories.SpaceTableColumnRepository;
 import com.goldencashbunny.demo.presentation.repositories.SpaceTableRepository;
 import jakarta.transaction.Transactional;
@@ -30,19 +29,19 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
     private final SpaceTableColumnRepository spaceTableColumnRepository;
 
-    private final SpaceTableColumnDataRepository spaceTableColumnDataRepository;
+    private final SpaceTableColumnRowRepository spaceTableColumnRowRepository;
 
     @Autowired
     public SpaceUseCaseImpl(
             SpaceRepository spaceRepository,
             SpaceTableRepository spaceTableRepository,
             SpaceTableColumnRepository spaceTableColumnRepository,
-            SpaceTableColumnDataRepository spaceTableColumnDataRepository
+            SpaceTableColumnRowRepository spaceTableColumnRowRepository
     ) {
         this.spaceRepository = spaceRepository;
         this.spaceTableRepository = spaceTableRepository;
         this.spaceTableColumnRepository = spaceTableColumnRepository;
-        this.spaceTableColumnDataRepository = spaceTableColumnDataRepository;
+        this.spaceTableColumnRowRepository = spaceTableColumnRowRepository;
     }
 
     @Override
@@ -178,13 +177,13 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
     @Override
     @Transactional
-    public SpaceTableColumnData createColumnData(CreateSpaceTableColumnDataRequest request, SpaceTableColumn column) {
+    public SpaceTableColumnRow createColumnRow(CreateSpaceTableColumnRowRequest request, SpaceTableColumn column) {
 
         if(request.getRowReference() < 0) {
             throw new InvalidRowReferenceException(ErrorMessages.ERROR_INVALID_ROW_REFERENCE.getMessage());
         }
 
-        var rowIsAlreadyOccupied = this.spaceTableColumnDataRepository.existsByRowReferenceAndSpaceTableColumnId(
+        var rowIsAlreadyOccupied = this.spaceTableColumnRowRepository.existsByRowReferenceAndSpaceTableColumnId(
                 request.getRowReference(), column.getId()
         );
 
@@ -196,7 +195,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         adjustValueAccordingToColumnType(request, column.getColumnType());
 
-        return this.spaceTableColumnDataRepository.save(SpaceTableColumnData.fromCreateSpaceTableColumnRequest(request, column));
+        return this.spaceTableColumnRowRepository.save(SpaceTableColumnRow.fromCreateSpaceTableColumnRowRequest(request, column));
     }
 
     private void validateUpdatedColumnReference(Integer columnReference, SpaceTableColumn nonUpdatedColumn) {
@@ -265,7 +264,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
         };
     }
 
-    private void adjustValueAccordingToColumnType(CreateSpaceTableColumnDataRequest request, SpaceTableColumnType columnType) {
+    private void adjustValueAccordingToColumnType(CreateSpaceTableColumnRowRequest request, SpaceTableColumnType columnType) {
         switch (columnType) {
             case DATE -> request.setValue(SpaceTableUtils.convertStringToDefaultDatePattern(request.getValue()));
             case CHECKBOX -> request.setValue(Boolean.valueOf(request.getValue()).toString());
