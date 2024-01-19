@@ -6,6 +6,7 @@ COPY . .
 
 RUN apt-get install maven -y
 RUN mvn clean install
+RUN docker-compose up -d
 
 FROM openjdk:17-jdk-slim
 
