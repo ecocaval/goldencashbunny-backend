@@ -218,7 +218,7 @@ public class SpaceController {
         );
     }
 
-    @DeleteMapping("/space/table/{tableId}/columns/{columnReferences}")
+    @DeleteMapping("/space/table/{tableId}/column/references/{columnReferences}")
     public ResponseEntity<DeleteManyColumnsResponse> deleteTableColumn(
             @PathVariable("tableId") String tableId,
             @PathVariable("columnReferences") List<Integer> columnReferences
