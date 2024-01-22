@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("v1")
@@ -217,42 +218,39 @@ public class SpaceController {
         );
     }
 
-    @DeleteMapping("/space/table/columns/{columnIds}")
-    public ResponseEntity<DeleteManyResponse> deleteTableColumn(
-            @PathVariable("columnIds") List<String> columnIds
+    @DeleteMapping("/space/table/{tableId}/columns/{columnReferences}")
+    public ResponseEntity<DeleteManyColumnsResponse> deleteTableColumn(
+            @PathVariable("tableId") String tableId,
+            @PathVariable("columnReferences") List<Integer> columnReferences
     ) {
-        var response = new DeleteManyResponse();
+        var response = new DeleteManyColumnsResponse();
 
-        Set<SpaceTableColumn> columnsToDelete = new HashSet<>();
+        var table = this.spaceUseCase.findTableById(tableId);
 
-        for (String columnId : columnIds) {
+        JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
 
-            SpaceTableColumn column = null;
+        Set<SpaceTableColumn> columnsToDelete = table.getColumns()
+                .stream()
+                .filter(column -> columnReferences.contains(column.getColumnReference()))
+                .collect(Collectors.toSet());
 
-            try {
-                column = this.spaceUseCase.findColumnById(columnId);
-            } catch (SpaceTableColumnNotFoundException | BadRequestException ex) {
-                response.getErrorMessages().add(
-                        new DeleteManyResponse.DeleteErrorMessage(columnId, ex.getMessage())
-                );
-                continue;
-            }
+        Set<Integer> foundColumnReferences = columnsToDelete.stream()
+                .map(SpaceTableColumn::getColumnReference)
+                .collect(Collectors.toSet());
 
-            try {
-                JwtUtils.validateAdminRoleOrSameAccount(
-                        column.getSpaceTable().getSpace().getWorkspace().getAccount().getId()
-                );
-            } catch (UnauthorizedException ex) {
-                response.getErrorMessages().add(
-                        new DeleteManyResponse.DeleteErrorMessage(columnId, ex.getMessage())
-                );
-                continue;
-            }
+        columnReferences.stream()
+                .filter(columnReference -> !foundColumnReferences.contains(columnReference))
+                .map(columnReference -> new DeleteManyColumnsResponse.DeleteManyColumnsErrorMessage(
+                        columnReference,
+                        ErrorMessages.ERROR_SPACE_TABLE_COLUMN_NOT_FOUND_BY_REFERENCE.getMessage()
+                ))
+                .forEach(response.getErrorMessages()::add);
 
-            columnsToDelete.add(column);
-        }
+        table.getColumns().removeAll(columnsToDelete);
 
         this.spaceUseCase.deleteManyColumns(columnsToDelete);
+
+        response.setColumns(table.getColumns().stream().map(SpaceTableColumnResponse::fromSpaceTableColumn).toList());
 
         return ResponseEntity.ok(response);
     }
