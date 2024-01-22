@@ -11,13 +11,10 @@ import com.goldencashbunny.demo.presentation.entities.SpaceTable;
 import com.goldencashbunny.demo.presentation.entities.SpaceTableColumn;
 import com.goldencashbunny.demo.presentation.entities.SpaceTableColumnRow;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceNotFoundException;
-import com.goldencashbunny.demo.presentation.exceptions.SpaceTableColumnNotFoundException;
-import com.goldencashbunny.demo.presentation.exceptions.SpaceTableColumnRowNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceTableNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.base.BadRequestException;
 import com.goldencashbunny.demo.presentation.exceptions.base.UnauthorizedException;
 import jakarta.validation.Valid;
-import org.hibernate.sql.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -219,11 +216,11 @@ public class SpaceController {
     }
 
     @DeleteMapping("/space/table/{tableId}/column/references/{columnReferences}")
-    public ResponseEntity<DeleteManyColumnsResponse> deleteTableColumn(
+    public ResponseEntity<DeleteManyByReferenceResponse> deleteTableColumns(
             @PathVariable("tableId") String tableId,
             @PathVariable("columnReferences") List<Integer> columnReferences
     ) {
-        var response = new DeleteManyColumnsResponse();
+        var response = new DeleteManyByReferenceResponse();
 
         var table = this.spaceUseCase.findTableById(tableId);
 
@@ -240,7 +237,7 @@ public class SpaceController {
 
         columnReferences.stream()
                 .filter(columnReference -> !foundColumnReferences.contains(columnReference))
-                .map(columnReference -> new DeleteManyColumnsResponse.DeleteManyColumnsErrorMessage(
+                .map(columnReference -> new DeleteManyByReferenceResponse.DeleteManyByReferenceErrorMessage(
                         columnReference,
                         ErrorMessages.ERROR_SPACE_TABLE_COLUMN_NOT_FOUND_BY_REFERENCE.getMessage()
                 ))
@@ -285,7 +282,7 @@ public class SpaceController {
         );
     }
 
-    @PatchMapping("space/table/{tableId}/rows")
+    @PatchMapping("/space/table/{tableId}/rows")
     public ResponseEntity<SpaceTableResponse> updateTableRowsPositions(
             @PathVariable("tableId") String tableId,
             @RequestBody UpdateSpaceTableColumnRowReferenceRequest request
@@ -299,4 +296,48 @@ public class SpaceController {
         );
     }
 
+    @DeleteMapping("/space/table/{tableId}/row/references/{rowReferences}")
+    public ResponseEntity<DeleteManyByReferenceResponse> deleteTableRows(
+            @PathVariable("tableId") String tableId,
+            @PathVariable("rowReferences") List<Integer> rowReferences
+    ) {
+        var response = new DeleteManyByReferenceResponse();
+
+        var table = this.spaceUseCase.findTableById(tableId);
+
+        JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
+
+        Set<SpaceTableColumnRow> rowsToDelete = new HashSet<>();
+
+        table.getColumns().forEach(column -> column.getSpaceTableColumnRows()
+                .stream()
+                .filter(row -> rowReferences.contains(row.getRowReference()))
+                .forEach(rowsToDelete::add));
+
+        Set<Integer> foundRowReferences = rowsToDelete.stream()
+                .map(SpaceTableColumnRow::getRowReference)
+                .collect(Collectors.toSet());
+
+        rowReferences.stream()
+                .filter(rowReference -> !foundRowReferences.contains(rowReference))
+                .map(rowReference -> new DeleteManyByReferenceResponse.DeleteManyByReferenceErrorMessage(
+                        rowReference,
+                        ErrorMessages.ERROR_SPACE_TABLE_ROW_NOT_FOUND_BY_REFERENCE.getMessage()
+                ))
+                .forEach(response.getErrorMessages()::add);
+
+        table.getColumns().forEach(column -> {
+            column.getSpaceTableColumnRows().removeAll(rowsToDelete);
+        });
+
+        this.spaceUseCase.deleteManyRows(rowsToDelete, table.getColumns());
+
+        response.setColumns(
+                table.getColumns()
+                        .stream()
+                        .map(SpaceTableColumnResponse::fromSpaceTableColumn).toList()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }

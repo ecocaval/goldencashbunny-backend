@@ -1,8 +1,6 @@
 package com.goldencashbunny.demo.core.data.responses;
 
-import com.goldencashbunny.demo.presentation.entities.SpaceTableColumn;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,17 +10,17 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class DeleteManyColumnsResponse {
+public class DeleteManyByReferenceResponse {
 
     private List<SpaceTableColumnResponse> columns = new ArrayList<>();
 
-    private List<DeleteManyColumnsErrorMessage> errorMessages = new ArrayList<>();
+    private List<DeleteManyByReferenceErrorMessage> errorMessages = new ArrayList<>();
 
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    public static class DeleteManyColumnsErrorMessage {
+    public static class DeleteManyByReferenceErrorMessage {
 
         private Integer reference;
         private String details;

@@ -36,6 +36,7 @@ public enum ErrorMessages {
     ERROR_SPACE_TABLE_NOT_FOUND_BY_ID("O tabela com este id não foi encontrada."),
     ERROR_SPACE_TABLE_COLUMN_NOT_FOUND_BY_ID("A coluna da tabela com este id não foi encontrada."),
     ERROR_SPACE_TABLE_COLUMN_NOT_FOUND_BY_REFERENCE("A coluna da tabela com esta referencia não foi encontrada."),
+    ERROR_SPACE_TABLE_ROW_NOT_FOUND_BY_REFERENCE("A(s) linha(s) da tabela com esta referencia não foram encontradas."),
     ERROR_SPACE_TABLE_COLUMN_ROW_NOT_FOUND_BY_ID("A linha da coluna da tabela com este id não foi encontrada."),
     ERROR_INVALID_VALUE_FOR_COLUMN_TYPE("Este valor não pode ser atribuido a tabela, pois difere-se do tipo da coluna."),
     ERROR_INVALID_TOKEN("Por favor, envie um token válido para acessar este recurso."),

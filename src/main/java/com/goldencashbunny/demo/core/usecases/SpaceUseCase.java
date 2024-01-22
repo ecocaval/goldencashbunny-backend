@@ -42,6 +42,6 @@ public interface SpaceUseCase {
 
     SpaceTable updateTableRowsReference(UpdateSpaceTableColumnRowReferenceRequest request, SpaceTable table);
 
-//    void deleteManyColumnRows(Set<SpaceTableColumnRow> columnRows);
+    void deleteManyRows(Set<SpaceTableColumnRow> rowsToDelete, List<SpaceTableColumn> remainingColumns);
 
 }

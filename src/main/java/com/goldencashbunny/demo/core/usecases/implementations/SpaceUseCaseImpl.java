@@ -16,10 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class SpaceUseCaseImpl implements SpaceUseCase {
@@ -187,7 +184,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         this.spaceTableColumnRepository.deleteAll(columns);
 
-        adjustColumnsReferencesDueToDelete(allRemainingColumnsSortedByColumnReference);
+        adjustSortedColumnsReferencesDueToDelete(allRemainingColumnsSortedByColumnReference);
 
         this.spaceTableColumnRepository.saveAll(allRemainingColumnsSortedByColumnReference);
     }
@@ -252,7 +249,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         List<SpaceTableColumnRow> rowsWithOldRowReference = new ArrayList<>();
 
-        List<SpaceTableColumnRow> allRemainingRows = new ArrayList<>();
+        List<SpaceTableColumnRow> remainingRows = new ArrayList<>();
 
         for (SpaceTableColumn column : table.getColumns()) {
 
@@ -261,7 +258,7 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
                 if (row.getRowReference().equals(oldRowReference)) {
                     rowsWithOldRowReference.add(row);
                 } else {
-                    allRemainingRows.add(row);
+                    remainingRows.add(row);
                 }
             }
         }
@@ -272,11 +269,32 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         rowsWithOldRowReference.forEach(row -> row.setRowReference(newRowReference));
 
-        adjustRowsReferencesDueToUpdate(newRowReference, oldRowReference, allRemainingRows);
+        adjustRowsReferencesDueToUpdate(newRowReference, oldRowReference, remainingRows);
 
-        allRemainingRows.addAll(rowsWithOldRowReference);
+        remainingRows.addAll(rowsWithOldRowReference);
 
         return table;
+    }
+
+    @Override
+    @Transactional
+    public void deleteManyRows(Set<SpaceTableColumnRow> rowsToDelete, List<SpaceTableColumn> remainingColumns) {
+
+        if (rowsToDelete.isEmpty()) {
+            return;
+        }
+
+        this.spaceTableColumnRowRepository.deleteAll(rowsToDelete);
+
+        remainingColumns.forEach(column -> {
+            adjustSortedRowsReferencesDueToDelete(
+                    column.getSpaceTableColumnRows()
+                            .stream()
+                            .sorted(Comparator.comparing(SpaceTableColumnRow::getRowReference))
+                            .toList()
+            );
+            this.spaceTableColumnRowRepository.saveAll(column.getSpaceTableColumnRows());
+        });
     }
 
     private void validateUpdatedColumnReference(Integer columnReference, SpaceTableColumn nonUpdatedColumn) {
@@ -307,24 +325,24 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
         }
     }
 
-    private void adjustColumnsReferencesDueToDelete(
-            List<SpaceTableColumn> allRemainingColumnsSortedByColumnReference
+    private void adjustSortedColumnsReferencesDueToDelete(
+            List<SpaceTableColumn> allRemainingColumnsSortedByReference
     ) {
-        for (int i = 0; i < allRemainingColumnsSortedByColumnReference.size(); i++) {
+        for (int i = 0; i < allRemainingColumnsSortedByReference.size(); i++) {
 
-            int newColumnReference = allRemainingColumnsSortedByColumnReference.get(i).getColumnReference();
+            int newColumnReference = allRemainingColumnsSortedByReference.get(i).getColumnReference();
 
             if (i == 0) {
                 while (newColumnReference > 0) {
                     newColumnReference--;
                 }
-                allRemainingColumnsSortedByColumnReference.get(i).setColumnReference(newColumnReference);
+                allRemainingColumnsSortedByReference.get(i).setColumnReference(newColumnReference);
 
             } else {
-                while (newColumnReference > allRemainingColumnsSortedByColumnReference.get(i - 1).getColumnReference() + 1) {
+                while (newColumnReference > allRemainingColumnsSortedByReference.get(i - 1).getColumnReference() + 1) {
                     newColumnReference--;
                 }
-                allRemainingColumnsSortedByColumnReference.get(i).setColumnReference(newColumnReference);
+                allRemainingColumnsSortedByReference.get(i).setColumnReference(newColumnReference);
             }
         }
     }
@@ -387,6 +405,28 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
                 if (row.getRowReference() <= newRowReference && row.getRowReference() > oldRowReference)
                     row.setRowReference(row.getRowReference() - 1);
             });
+        }
+    }
+
+    private void adjustSortedRowsReferencesDueToDelete(
+            List<SpaceTableColumnRow> allRemainingRowsSortedByReference
+    ) {
+        for (int i = 0; i < allRemainingRowsSortedByReference.size(); i++) {
+
+            int newRowReference = allRemainingRowsSortedByReference.get(i).getRowReference();
+
+            if (i == 0) {
+                while (newRowReference > 0) {
+                    newRowReference--;
+                }
+                allRemainingRowsSortedByReference.get(i).setRowReference(newRowReference);
+
+            } else {
+                while (newRowReference > allRemainingRowsSortedByReference.get(i - 1).getRowReference() + 1) {
+                    newRowReference--;
+                }
+                allRemainingRowsSortedByReference.get(i).setRowReference(newRowReference);
+            }
         }
     }
 }
