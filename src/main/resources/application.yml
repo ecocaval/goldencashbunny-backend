@@ -1,14 +1,14 @@
 server:
-   port: 8090
+   port: 8080
 
 spring:
   application:
     name: goldencashbunny-backend
-
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://golden_cash_bunny_user:luPyDuzpp5DCoXy4uTHcWqY4Zkrph8cR@dpg-cmlfd1i1hbls73c8un0g-a/golden_cash_bunny
-
+    url: jdbc:postgresql://golden-cash-bunny-db.c1k8ckseaan4.us-east-2.rds.amazonaws.com:5432/initial_db
+    username: postgres
+    password: eridogisthemaster
   jpa:
     show-sql: false
     hibernate:

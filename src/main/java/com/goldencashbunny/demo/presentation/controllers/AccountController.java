@@ -35,20 +35,6 @@ public class AccountController {
         );
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<AccountResponse> findByEmail(@PathVariable("email") String email) {
-
-        JwtUtils.validateAdminRoleOrSameAccount(email);
-
-        RegexValidator.applyRegexValidation(
-            RegexValidator.EMAIL_REGEX, email, ErrorMessages.ERROR_ACCOUNT_EMAIL_OUT_OF_PATTERN.getMessage()
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(
-            AccountResponse.fromAccount(this.accountUseCase.findByEmail(email, Boolean.TRUE))
-        );
-    }
-
     @PostMapping
     public ResponseEntity<AccountResponse> create(@RequestBody @Valid CreateAccountRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(

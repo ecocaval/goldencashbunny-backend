@@ -2,6 +2,7 @@ package com.goldencashbunny.demo.presentation.controllers;
 
 import com.goldencashbunny.demo.core.data.requests.*;
 import com.goldencashbunny.demo.core.data.responses.*;
+import com.goldencashbunny.demo.core.messages.ErrorMessages;
 import com.goldencashbunny.demo.core.usecases.SpaceUseCase;
 import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.infra.security.JwtUtils;
@@ -281,7 +282,7 @@ public class SpaceController {
                 row.getSpaceTableColumn().getSpaceTable().getSpace().getWorkspace().getAccount().getId()
         );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
+        return ResponseEntity.status(HttpStatus.OK).body(
                 SpaceTableColumnRowResponse.fromSpaceTableColumnRow(this.spaceUseCase.updateColumnRow(request, row))
         );
     }
@@ -295,9 +296,9 @@ public class SpaceController {
 
         JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
 
-        this.spaceUseCase.updateTableRowsReference(request, table);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.OK).body(
+                SpaceTableResponse.fromSpaceTable(this.spaceUseCase.updateTableRowsReference(request, table))
+        );
     }
 
 }

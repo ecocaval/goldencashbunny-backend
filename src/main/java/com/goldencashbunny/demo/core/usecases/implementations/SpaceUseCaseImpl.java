@@ -274,9 +274,9 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
         adjustRowsReferencesDueToUpdate(newRowReference, oldRowReference, allRemainingRows);
 
-        return null;
+        allRemainingRows.addAll(rowsWithOldRowReference);
 
-//        return this.spaceTableColumnRowRepository.save();
+        return table;
     }
 
     private void validateUpdatedColumnReference(Integer columnReference, SpaceTableColumn nonUpdatedColumn) {
@@ -378,13 +378,13 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
     ) {
         if (newRowReference < oldRowReference) {
             allRemainingRows.forEach(row -> {
-                if (row.getRowReference() >= row.getRowReference() && row.getRowReference() < row.getRowReference())
+                if (row.getRowReference() >= newRowReference && row.getRowReference() < oldRowReference)
                     row.setRowReference(row.getRowReference() + 1);
             });
 
         } else {
             allRemainingRows.forEach(row -> {
-                if (row.getRowReference() <= row.getRowReference() && row.getRowReference() > row.getRowReference())
+                if (row.getRowReference() <= newRowReference && row.getRowReference() > oldRowReference)
                     row.setRowReference(row.getRowReference() - 1);
             });
         }
