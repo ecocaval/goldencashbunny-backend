@@ -247,7 +247,7 @@ public class SpaceController {
 
         this.spaceUseCase.deleteManyColumns(columnsToDelete);
 
-        response.setColumns(table.getColumns().stream().map(SpaceTableColumnResponse::fromSpaceTableColumn).toList());
+        response.setTable(SpaceTableResponse.fromSpaceTable(table));
 
         return ResponseEntity.ok(response);
     }
@@ -332,11 +332,7 @@ public class SpaceController {
 
         this.spaceUseCase.deleteManyRows(rowsToDelete, table.getColumns());
 
-        response.setColumns(
-                table.getColumns()
-                        .stream()
-                        .map(SpaceTableColumnResponse::fromSpaceTableColumn).toList()
-        );
+        response.setTable(SpaceTableResponse.fromSpaceTable(table));
 
         return ResponseEntity.ok(response);
     }

@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 public class DeleteManyByReferenceResponse {
 
-    private List<SpaceTableColumnResponse> columns = new ArrayList<>();
+    private SpaceTableResponse table;
 
     private List<DeleteManyByReferenceErrorMessage> errorMessages = new ArrayList<>();
 
