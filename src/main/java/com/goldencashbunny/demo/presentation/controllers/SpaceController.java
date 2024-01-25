@@ -118,6 +118,19 @@ public class SpaceController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("space/table/{tableId}")
+    public ResponseEntity<SpaceTableResponse> findTableById(
+            @PathVariable("tableId") String tableId
+    ) {
+        var table = this.spaceUseCase.findTableById(tableId);
+
+        JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                SpaceTableResponse.fromSpaceTable(table)
+        );
+    }
+
     @PostMapping("space/{spaceId}/table")
     public ResponseEntity<SpaceTableResponse> createTable(
             @PathVariable("spaceId") String spaceId,
