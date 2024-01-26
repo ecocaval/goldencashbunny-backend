@@ -9,5 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class UpdateSpaceTableColumnRowRequest {
 
+    private Integer columnReference;
+
+    private Integer rowReference;
+
     private String value;
 }

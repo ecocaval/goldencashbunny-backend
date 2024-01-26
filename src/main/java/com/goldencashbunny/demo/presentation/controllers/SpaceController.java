@@ -10,6 +10,7 @@ import com.goldencashbunny.demo.presentation.entities.Space;
 import com.goldencashbunny.demo.presentation.entities.SpaceTable;
 import com.goldencashbunny.demo.presentation.entities.SpaceTableColumn;
 import com.goldencashbunny.demo.presentation.entities.SpaceTableColumnRow;
+import com.goldencashbunny.demo.presentation.exceptions.InvalidValueForColumnTypeException;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.SpaceTableNotFoundException;
 import com.goldencashbunny.demo.presentation.exceptions.base.BadRequestException;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,10 +48,8 @@ public class SpaceController {
 
         JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
 
-        var spaces = this.spaceUseCase.findByWorkSpaceId(workSpaceId);
-
         return ResponseEntity.status(HttpStatus.OK).body(
-                spaces.stream().map(SpaceResponse::fromSpace).toList()
+                this.spaceUseCase.findByWorkSpaceId(workSpaceId).stream().map(SpaceResponse::fromSpace).toList()
         );
     }
 
@@ -265,37 +265,73 @@ public class SpaceController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/space/table/column/{columnId}/row")
-    public ResponseEntity<SpaceTableColumnRowResponse> createTableColumRow(
-            @PathVariable("columnId") String columnId,
-            @RequestBody @Valid CreateSpaceTableColumnRowRequest request
+    @PostMapping("/space/table/{tableId}/rows")
+    public ResponseEntity<SpaceTableResponse> createTableColumRow(
+            @PathVariable("tableId") String tableId,
+            @RequestBody List<CreateSpaceTableColumnRowRequest> requests
     ) {
-        var column = this.spaceUseCase.findColumnById(columnId);
+        var table = this.spaceUseCase.findTableById(tableId);
 
-        JwtUtils.validateAdminRoleOrSameAccount(column.getSpaceTable().getSpace().getWorkspace().getAccount().getId());
+        JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
+
+        var columns = table.getColumns()
+                .stream()
+                .sorted(Comparator.comparing(SpaceTableColumn::getColumnReference))
+                .toList();
+
+        requests.forEach(request -> {
+                    try {
+                        this.spaceUseCase.createColumnRow(request, columns.get(request.getColumnReference()));
+                    } catch (IndexOutOfBoundsException ignore) {
+                    }
+                }
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                SpaceTableColumnRowResponse.fromSpaceTableColumnRow(this.spaceUseCase.createColumnRow(request, column))
-        );
-    }
-
-    @PatchMapping("/space/table/column/row/{rowId}")
-    public ResponseEntity<SpaceTableColumnRowResponse> updateTableColumRow(
-            @PathVariable("rowId") String rowId,
-            @RequestBody UpdateSpaceTableColumnRowRequest request
-    ) {
-        var row = this.spaceUseCase.findColumnRowById(rowId);
-
-        JwtUtils.validateAdminRoleOrSameAccount(
-                row.getSpaceTableColumn().getSpaceTable().getSpace().getWorkspace().getAccount().getId()
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(
-                SpaceTableColumnRowResponse.fromSpaceTableColumnRow(this.spaceUseCase.updateColumnRow(request, row))
+                SpaceTableResponse.fromSpaceTable(this.spaceUseCase.findTableById(tableId))
         );
     }
 
     @PatchMapping("/space/table/{tableId}/rows")
+    public ResponseEntity<UpdateManySpaceTableRowsResponse> updateTableColumRow(
+            @PathVariable("tableId") String tableId,
+            @RequestBody List<UpdateSpaceTableColumnRowRequest> requests
+    ) {
+        var table = this.spaceUseCase.findTableById(tableId);
+
+        JwtUtils.validateAdminRoleOrSameAccount(table.getSpace().getWorkspace().getAccount().getId());
+
+        var columns = table.getColumns()
+                .stream()
+                .sorted(Comparator.comparing(SpaceTableColumn::getColumnReference))
+                .toList();
+
+        var response = new UpdateManySpaceTableRowsResponse();
+
+        requests.forEach(request -> {
+                final var rows = columns.get(request.getColumnReference())
+                        .getSpaceTableColumnRows()
+                        .stream()
+                        .sorted(Comparator.comparing(SpaceTableColumnRow::getRowReference))
+                        .toList();
+                try {
+                    this.spaceUseCase.updateColumnRow(request, rows.get(request.getRowReference()));
+                } catch (IndexOutOfBoundsException ignore) {
+
+                } catch (InvalidValueForColumnTypeException ex) {
+                    response.getErrorMessages().add(
+                        new UpdateManySpaceTableRowsResponse.UpdateManySpaceTableRowsErrorMessage(ex.getMessage(), ex.getDetails())
+                    );
+                }
+            }
+        );
+
+        response.setTable(SpaceTableResponse.fromSpaceTable(this.spaceUseCase.findTableById(tableId)));
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/space/table/{tableId}/row")
     public ResponseEntity<SpaceTableResponse> updateTableRowsPositions(
             @PathVariable("tableId") String tableId,
             @RequestBody UpdateSpaceTableColumnRowReferenceRequest request
