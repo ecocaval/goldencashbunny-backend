@@ -33,7 +33,7 @@ public class SpaceTableColumn extends BaseEntity {
     @JoinColumn(name = "space_table_id")
     private SpaceTable spaceTable;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "spaceTableColumn", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "spaceTableColumn")
     private List<SpaceTableColumnRow> spaceTableColumnRows;
 
     @Enumerated(EnumType.STRING)
