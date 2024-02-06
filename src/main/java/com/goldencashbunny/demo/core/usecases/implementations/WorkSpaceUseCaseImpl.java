@@ -1,14 +1,17 @@
 package com.goldencashbunny.demo.core.usecases.implementations;
 
 import com.goldencashbunny.demo.core.data.dtos.CreateWorkSpaceDto;
+import com.goldencashbunny.demo.core.data.requests.CreateCustomerRequest;
 import com.goldencashbunny.demo.core.data.requests.CreateWorkSpaceRequest;
 import com.goldencashbunny.demo.core.data.requests.UpdateWorkSpaceRequest;
 import com.goldencashbunny.demo.core.messages.ErrorMessages;
 import com.goldencashbunny.demo.core.usecases.AccountUseCase;
 import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.core.utils.UuidUtils;
+import com.goldencashbunny.demo.presentation.entities.Customer;
 import com.goldencashbunny.demo.presentation.entities.Workspace;
 import com.goldencashbunny.demo.presentation.exceptions.WorkSpaceNotFoundException;
+import com.goldencashbunny.demo.presentation.repositories.CustomerRepository;
 import com.goldencashbunny.demo.presentation.repositories.WorkspaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,12 +26,15 @@ public class WorkSpaceUseCaseImpl implements WorkSpaceUseCase {
 
     private final WorkspaceRepository workspaceRepository;
 
+    private final CustomerRepository customerRepository;
+
     @Autowired
     public WorkSpaceUseCaseImpl(
-        AccountUseCase accountUseCase, WorkspaceRepository workspaceRepository
+        AccountUseCase accountUseCase, WorkspaceRepository workspaceRepository, CustomerRepository customerRepository
     ) {
         this.accountUseCase = accountUseCase;
         this.workspaceRepository = workspaceRepository;
+        this.customerRepository = customerRepository;
     }
 
     @Override
@@ -65,6 +71,11 @@ public class WorkSpaceUseCaseImpl implements WorkSpaceUseCase {
         return this.workspaceRepository.findByAccountIdOrderByIsFavoriteDesc(
             UuidUtils.getValidUuidFromString(accountId, ErrorMessages.ERROR_INVALID_ACCOUNT_ID.getMessage())
         );
+    }
+
+    @Override
+    public Customer createCustomerForWorkspace(CreateCustomerRequest request, Workspace workspace) {
+        return null;
     }
 
 }

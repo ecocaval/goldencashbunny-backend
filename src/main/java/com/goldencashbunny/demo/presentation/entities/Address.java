@@ -1,9 +1,8 @@
 package com.goldencashbunny.demo.presentation.entities;
 
+import com.goldencashbunny.demo.core.data.enums.BrazilState;
 import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -19,7 +18,7 @@ public class Address extends BaseEntity {
     private String zipCode;
 
     @Column(length = 100, nullable = false)
-    private String address;
+    private String name;
 
     @Column(length = 6)
     private String number;
@@ -33,8 +32,12 @@ public class Address extends BaseEntity {
     @Column(nullable = false)
     private String city;
 
+    @Column
+    private String ibgeCode;
+
     @Column(nullable = false)
-    private String state;
+    @Enumerated(EnumType.STRING)
+    private BrazilState state;
 
     @OneToOne(optional = false)
     private Customer customer;
