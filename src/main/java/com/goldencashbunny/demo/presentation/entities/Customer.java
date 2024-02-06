@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -51,7 +50,7 @@ public class Customer extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private List<CustomerAdditionalEmail> customerAdditionalEmails;
 
-    public static Customer fromCreateRequest(CreateCustomerRequest request) {
+    public static Customer fromCreateRequest(CreateCustomerRequest request, Workspace workspace) {
         var customer = Customer.builder()
                 .firstName(request.getFirstName())
                 .cpf(request.getCpf())
@@ -59,7 +58,16 @@ public class Customer extends BaseEntity {
                 .companyName(request.getCompanyName())
                 .socialCompanyName(request.getSocialCompanyName())
                 .phone(request.getPhone())
+                .workspace(workspace)
                 .build();
+
+        if(request.getCustomerAdditionalEmails() != null) {
+            customer.setCustomerAdditionalEmails(
+                    request.getCustomerAdditionalEmails().stream()
+                            .map(email -> new CustomerAdditionalEmail(customer, email))
+                            .toList()
+            );
+        }
 
         if(request.getAddress() != null) {
             customer.setAddress(
@@ -71,6 +79,7 @@ public class Customer extends BaseEntity {
                             .complement(request.getAddress().getComplement())
                             .city(request.getAddress().getCity())
                             .state(request.getAddress().getState())
+                            .ibgeCode(request.getAddress().getIbgeCode())
                             .customer(customer)
                             .build()
             );

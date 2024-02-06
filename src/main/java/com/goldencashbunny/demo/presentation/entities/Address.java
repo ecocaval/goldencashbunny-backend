@@ -32,7 +32,7 @@ public class Address extends BaseEntity {
     @Column(nullable = false)
     private String city;
 
-    @Column
+    @Column(length = 7)
     private String ibgeCode;
 
     @Column(nullable = false)

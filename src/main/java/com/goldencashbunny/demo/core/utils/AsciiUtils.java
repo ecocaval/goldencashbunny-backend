@@ -24,6 +24,7 @@ public class AsciiUtils {
 
         input = removeAccents(input);
         input = toLowerCaseAndTrim(input);
+        input = input.replaceAll("-","");
 
         if (forDocument) {
             input = removeSpecialCharactersForDocuments(input);

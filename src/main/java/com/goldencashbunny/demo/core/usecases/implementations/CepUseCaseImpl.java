@@ -38,7 +38,11 @@ public class CepUseCaseImpl implements CepUseCase {
     @Override
     public ViaCepDto getAddressByZipCode(String zipCode) {
         try {
-            return cepClient.getAddressByZipCode(AsciiUtils.cleanString(zipCode));
+            var address = cepClient.getAddressByZipCode(AsciiUtils.cleanString(zipCode));
+            if(address.getCep() != null) {
+                return address;
+            }
+            throw new CepNotFoundException(zipCode);
         } catch (FeignException ex) {
             throw new CepNotFoundException(zipCode);
         }

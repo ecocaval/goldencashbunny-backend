@@ -48,7 +48,6 @@ public class Workspace extends BaseEntity {
                 .companyName(createWorkSpaceDto.getCompanyName())
                 .socialCompanyName(createWorkSpaceDto.getSocialCompanyName())
                 .account(createWorkSpaceDto.getAccount())
-                .creationDate(LocalDateTime.now())
                 .deleted(Boolean.FALSE)
                 .build();
     }

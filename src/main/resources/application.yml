@@ -6,16 +6,16 @@ spring:
     name: goldencashbunny-backend
   datasource:
     driverClassName: org.postgresql.Driver
-#    url: jdbc:postgresql://golden-cash-bunny-db.c1k8ckseaan4.us-east-2.rds.amazonaws.com:5432/initial_db
-#    username: postgres
-#    password: eridogisthemaster
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://golden-cash-bunny-db.c1k8ckseaan4.us-east-2.rds.amazonaws.com:5432/initial_db
     username: postgres
-    password: 123
+    password: eridogisthemaster
+#    url: jdbc:postgresql://localhost:5432/postgres
+#    username: postgres
+#    password: 123
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
 
 api:
   security:

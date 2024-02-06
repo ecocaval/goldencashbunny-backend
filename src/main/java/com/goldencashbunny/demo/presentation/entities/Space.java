@@ -47,7 +47,6 @@ public class Space extends BaseEntity {
         return Space.builder()
                 .name(createSpaceRequest.getName())
                 .workspace(workspace)
-                .creationDate(LocalDateTime.now())
                 .deleted(Boolean.FALSE)
                 .build();
     }

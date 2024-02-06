@@ -7,9 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorMessages {
 
-    ERROR_ACCOUNT_EMAIL_OUT_OF_PATTERN("Por favor, insira um e-mail válido."),
-    ERROR_ACCOUNT_CPF_OUT_OF_PATTERN("Por favor, insira um cpf válido."),
-    ERROR_ACCOUNT_CNPJ_OUT_OF_PATTERN("Por favor, insira um cnpj válido."),
+    ERROR_EMAIL_OUT_OF_PATTERN("Por favor, insira um e-mail válido."),
+    ERROR_CPF_OUT_OF_PATTERN("Por favor, insira um cpf válido."),
+    ERROR_CNPJ_OUT_OF_PATTERN("Por favor, insira um cnpj válido."),
     ERROR_ACCOUNT_EMAIL_ALREADY_IN_USE("Este e-mail já está em uso."),
     ERROR_ACCOUNT_NOT_FOUND_BY_USERNAME("A conta com este username não foi encontrada."),
     ERROR_ACCOUNT_NOT_FOUND_BY_ID("A conta com este id não foi encontrada."),

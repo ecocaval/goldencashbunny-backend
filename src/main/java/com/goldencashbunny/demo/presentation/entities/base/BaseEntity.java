@@ -19,7 +19,7 @@ public class BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(columnDefinition = "timestamp", nullable = false)
+    @Column(columnDefinition = "timestamp default now()", nullable = false)
     private LocalDateTime creationDate;
 
     @Column(columnDefinition = "timestamp")
@@ -27,5 +27,15 @@ public class BaseEntity {
 
     @Column(columnDefinition = "bool default FALSE", nullable = false)
     private boolean deleted;
+
+    @PrePersist
+    protected void onCreate() {
+        creationDate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        lastModifiedDate = LocalDateTime.now();
+    }
 
 }

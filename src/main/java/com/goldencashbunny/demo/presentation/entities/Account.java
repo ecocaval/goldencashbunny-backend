@@ -23,16 +23,16 @@ import java.util.UUID;
 @SQLRestriction("deleted = false")
 public class Account extends BaseEntity {
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50, nullable = false, unique = true)
     private String userName;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(length = 11)
+    @Column(length = 11, unique = true)
     private String cpf;
 
-    @Column(length = 14)
+    @Column(length = 14, unique = true)
     private String cnpj;
 
     @Column(nullable = false)
@@ -52,7 +52,6 @@ public class Account extends BaseEntity {
     public static Account fromCreateRequest(CreateAccountRequest createAccountRequest) {
         return Account.builder()
                 .id(UUID.randomUUID())
-                .creationDate(LocalDateTime.now())
                 .userName(createAccountRequest.getUserName())
                 .email(createAccountRequest.getEmail())
                 .cpf(createAccountRequest.getCpf())

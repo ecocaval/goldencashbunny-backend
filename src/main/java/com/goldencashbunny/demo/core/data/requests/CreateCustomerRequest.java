@@ -37,7 +37,7 @@ public class CreateCustomerRequest {
 
     private CreateAddressRequest Address;
 
-    private List<CustomerAdditionalEmail> customerAdditionalEmails;
+    private List<String> customerAdditionalEmails;
 
     @NoArgsConstructor
     @AllArgsConstructor
@@ -58,6 +58,6 @@ public class CreateCustomerRequest {
 
         private BrazilState state;
 
-        private Customer customer;
+        private String ibgeCode;
     }
 }

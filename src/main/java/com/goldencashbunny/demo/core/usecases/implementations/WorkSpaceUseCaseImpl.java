@@ -1,13 +1,16 @@
 package com.goldencashbunny.demo.core.usecases.implementations;
 
 import com.goldencashbunny.demo.core.data.dtos.CreateWorkSpaceDto;
+import com.goldencashbunny.demo.core.data.enums.RegexValidator;
 import com.goldencashbunny.demo.core.data.requests.CreateCustomerRequest;
 import com.goldencashbunny.demo.core.data.requests.CreateWorkSpaceRequest;
 import com.goldencashbunny.demo.core.data.requests.UpdateWorkSpaceRequest;
 import com.goldencashbunny.demo.core.messages.ErrorMessages;
 import com.goldencashbunny.demo.core.usecases.AccountUseCase;
 import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
+import com.goldencashbunny.demo.core.utils.AsciiUtils;
 import com.goldencashbunny.demo.core.utils.UuidUtils;
+import com.goldencashbunny.demo.presentation.entities.Account;
 import com.goldencashbunny.demo.presentation.entities.Customer;
 import com.goldencashbunny.demo.presentation.entities.Workspace;
 import com.goldencashbunny.demo.presentation.exceptions.WorkSpaceNotFoundException;
@@ -75,7 +78,51 @@ public class WorkSpaceUseCaseImpl implements WorkSpaceUseCase {
 
     @Override
     public Customer createCustomerForWorkspace(CreateCustomerRequest request, Workspace workspace) {
-        return null;
+
+        Customer customer = Customer.fromCreateRequest(request, workspace);
+
+        validateInputs(customer);
+        cleanInputs(customer);
+
+        return this.customerRepository.save(customer);
+    }
+
+    private void validateInputs(Customer customer) {
+        if(customer.getEmail() != null)
+            RegexValidator.applyRegexValidation(
+                    RegexValidator.EMAIL_REGEX,
+                    customer.getEmail(),
+                    ErrorMessages.ERROR_EMAIL_OUT_OF_PATTERN.getMessage()
+            );
+
+        if(customer.getCpf() != null)
+            RegexValidator.applyRegexValidation(
+                    RegexValidator.CPF_REGEX,
+                    customer.getCpf(),
+                    ErrorMessages.ERROR_CPF_OUT_OF_PATTERN.getMessage()
+            );
+
+        if(customer.getCnpj() != null)
+            RegexValidator.applyRegexValidation(
+                    RegexValidator.CNPJ_REGEX,
+                    customer.getCnpj(),
+                    ErrorMessages.ERROR_CNPJ_OUT_OF_PATTERN.getMessage()
+            );
+
+        if(customer.getCustomerAdditionalEmails() != null)
+            customer.getCustomerAdditionalEmails().forEach(email -> {
+                RegexValidator.applyRegexValidation(
+                        RegexValidator.EMAIL_REGEX,
+                        email.getEmail(),
+                        ErrorMessages.ERROR_EMAIL_OUT_OF_PATTERN.getMessage()
+                );
+            });
+    }
+
+    private void cleanInputs(Customer customer) {
+        customer.setEmail(AsciiUtils.cleanString(customer.getEmail()));
+        customer.setCpf(AsciiUtils.cleanDocumentString(customer.getCpf()));
+        customer.setCnpj(AsciiUtils.cleanDocumentString(customer.getCnpj()));
     }
 
 }

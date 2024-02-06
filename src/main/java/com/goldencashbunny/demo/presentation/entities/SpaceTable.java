@@ -43,7 +43,6 @@ public class SpaceTable extends BaseEntity {
         return SpaceTable.builder()
                 .name(request.getName())
                 .space(space)
-                .creationDate(LocalDateTime.now())
                 .build();
     }
 

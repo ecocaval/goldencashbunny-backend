@@ -1,6 +1,7 @@
 package com.goldencashbunny.demo.presentation.controllers;
 
 import com.goldencashbunny.demo.core.data.requests.CreateCustomerRequest;
+import com.goldencashbunny.demo.core.data.responses.CustomerResponse;
 import com.goldencashbunny.demo.core.usecases.WorkSpaceUseCase;
 import com.goldencashbunny.demo.infra.security.JwtUtils;
 import jakarta.validation.Valid;
@@ -20,8 +21,8 @@ public class CustomerController {
         this.workSpaceUseCase = workSpaceUseCase;
     }
 
-    @PostMapping("/{workSpaceId}")
-    public ResponseEntity<?> createCustomerForWorkspace(
+    @PostMapping("/workspace/{workSpaceId}")
+    public ResponseEntity<CustomerResponse> createCustomerForWorkspace(
             @PathVariable("workSpaceId") String workSpaceId,
             @RequestBody @Valid CreateCustomerRequest request
     ) {
@@ -30,7 +31,7 @@ public class CustomerController {
         JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                this.workSpaceUseCase.createCustomerForWorkspace(request, workSpace)
+                CustomerResponse.fromCustomer(workSpaceUseCase.createCustomerForWorkspace(request, workSpace))
         );
     }
 }
