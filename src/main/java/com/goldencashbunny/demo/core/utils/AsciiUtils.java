@@ -4,19 +4,19 @@ import java.text.Normalizer;
 
 public class AsciiUtils {
 
-    private String removeAccents(String input) {
+    private static String removeAccents(String input) {
         return Normalizer.normalize(input, Normalizer.Form.NFD).replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
     }
 
-    private String toLowerCaseAndTrim(String input) {
+    private static String toLowerCaseAndTrim(String input) {
         return input.trim().toLowerCase();
     }
 
-    private String removeSpecialCharactersForDocuments(String input) {
+    private static String removeSpecialCharactersForDocuments(String input) {
         return input.replaceAll("-", "").replaceAll("\\.", "");
     }
 
-    private String processString(String input, boolean forDocument) {
+    private static String processString(String input, boolean forDocument) {
 
         if (input == null || input.isBlank()) {
             return input;
@@ -24,6 +24,7 @@ public class AsciiUtils {
 
         input = removeAccents(input);
         input = toLowerCaseAndTrim(input);
+        input = input.replaceAll("-","");
 
         if (forDocument) {
             input = removeSpecialCharactersForDocuments(input);
@@ -32,11 +33,11 @@ public class AsciiUtils {
         return input;
     }
 
-    public String cleanString(String input) {
+    public static String cleanString(String input) {
         return processString(input, Boolean.FALSE);
     }
 
-    public String cleanDocumentString(String input) {
+    public static String cleanDocumentString(String input) {
         return processString(input, Boolean.TRUE);
     }
 }

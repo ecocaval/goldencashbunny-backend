@@ -40,12 +40,14 @@ public class Workspace extends BaseEntity {
     @ToString.Exclude
     private List<Space> spaces;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspace")
+    private List<Customer> customers;
+
     public static Workspace fromCreateWorkSpaceDto(CreateWorkSpaceDto createWorkSpaceDto) {
         return Workspace.builder()
                 .companyName(createWorkSpaceDto.getCompanyName())
                 .socialCompanyName(createWorkSpaceDto.getSocialCompanyName())
                 .account(createWorkSpaceDto.getAccount())
-                .creationDate(LocalDateTime.now())
                 .deleted(Boolean.FALSE)
                 .build();
     }

@@ -57,7 +57,6 @@ public class SpaceTableColumn extends BaseEntity {
                 .name(request.getName())
                 .spaceTable(spaceTable)
                 .columnType(request.getColumnType())
-                .creationDate(LocalDateTime.now())
                 .build();
     }
 

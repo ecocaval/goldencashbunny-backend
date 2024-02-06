@@ -28,8 +28,6 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     private final RoleRepository roleRepository;
 
-    private final AsciiUtils asciiUtils;
-
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -38,7 +36,6 @@ public class AccountUseCaseImpl implements AccountUseCase {
     ) {
         this.accountRepository = accountRepository;
         this.roleRepository = roleRepository;
-        this.asciiUtils = new AsciiUtils();
     }
 
     @Autowired
@@ -81,7 +78,7 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     @Override
     public Account findByCpf(String cpf, boolean shouldThrowException) {
-        var account = this.accountRepository.findByCpf(asciiUtils.cleanDocumentString(cpf));
+        var account = this.accountRepository.findByCpf(AsciiUtils.cleanDocumentString(cpf));
 
         if(account.isEmpty() && shouldThrowException) {
             throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_CPF.getMessage());
@@ -92,7 +89,7 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     @Override
     public Account findByCnpj(String cnpj, boolean shouldThrowException) {
-        var account = this.accountRepository.findByCnpjAndDeletedFalse(asciiUtils.cleanDocumentString(cnpj));
+        var account = this.accountRepository.findByCnpjAndDeletedFalse(AsciiUtils.cleanDocumentString(cnpj));
 
         if(account.isEmpty() && shouldThrowException) {
             throw new AccountNotFoundException(ErrorMessages.ERROR_ACCOUNT_NOT_FOUND_BY_CNPJ.getMessage());
@@ -151,9 +148,9 @@ public class AccountUseCaseImpl implements AccountUseCase {
     }
 
     private void cleanInputs(Account account) {
-        account.setEmail(asciiUtils.cleanString(account.getEmail()));
-        account.setCpf(asciiUtils.cleanDocumentString(account.getCpf()));
-        account.setCnpj(asciiUtils.cleanDocumentString(account.getCnpj()));
+        account.setEmail(AsciiUtils.cleanString(account.getEmail()));
+        account.setCpf(AsciiUtils.cleanDocumentString(account.getCpf()));
+        account.setCnpj(AsciiUtils.cleanDocumentString(account.getCnpj()));
     }
 
     private void validateInputs(Account account) {
@@ -161,21 +158,21 @@ public class AccountUseCaseImpl implements AccountUseCase {
             RegexValidator.applyRegexValidation(
                     RegexValidator.EMAIL_REGEX,
                     account.getEmail(),
-                    ErrorMessages.ERROR_ACCOUNT_EMAIL_OUT_OF_PATTERN.getMessage()
+                    ErrorMessages.ERROR_EMAIL_OUT_OF_PATTERN.getMessage()
             );
 
         if(account.getCpf() != null)
             RegexValidator.applyRegexValidation(
                     RegexValidator.CPF_REGEX,
                     account.getCpf(),
-                    ErrorMessages.ERROR_ACCOUNT_CPF_OUT_OF_PATTERN.getMessage()
+                    ErrorMessages.ERROR_CPF_OUT_OF_PATTERN.getMessage()
             );
 
         if(account.getCnpj() != null)
             RegexValidator.applyRegexValidation(
                     RegexValidator.CNPJ_REGEX,
                     account.getCnpj(),
-                    ErrorMessages.ERROR_ACCOUNT_CNPJ_OUT_OF_PATTERN.getMessage()
+                    ErrorMessages.ERROR_CNPJ_OUT_OF_PATTERN.getMessage()
             );
     }
 

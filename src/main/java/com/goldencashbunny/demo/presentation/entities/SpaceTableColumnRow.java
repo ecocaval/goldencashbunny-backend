@@ -47,7 +47,6 @@ public class SpaceTableColumnRow extends BaseEntity {
                 .spaceTableColumn(spaceTableColumn)
                 .rowReference(request.getRowReference())
                 .value(request.getValue())
-                .creationDate(LocalDateTime.now())
                 .build();
     }
 
