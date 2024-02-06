@@ -67,6 +67,19 @@ public class SpaceController {
         );
     }
 
+    @GetMapping("space/{spaceId}")
+    public ResponseEntity<SpaceResponse> findById(
+            @PathVariable("spaceId") String spaceId
+    ) {
+        var space = this.spaceUseCase.findById(spaceId);
+
+        JwtUtils.validateAdminRoleOrSameAccount(space.getWorkspace().getAccount().getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                SpaceResponse.fromSpace(space)
+        );
+    }
+
     @PatchMapping("space/{spaceId}")
     public ResponseEntity<SpaceResponse> update(
             @PathVariable("spaceId") String spaceId,

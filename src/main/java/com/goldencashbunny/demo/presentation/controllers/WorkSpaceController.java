@@ -45,6 +45,19 @@ public class WorkSpaceController {
         );
     }
 
+    @GetMapping("/{workSpaceId}")
+    public ResponseEntity<WorkSpaceResponse> findById(
+            @PathVariable("workSpaceId") String workSpaceId
+    ) {
+        var workSpace = this.workSpaceUseCase.findById(workSpaceId);
+
+        JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                WorkSpaceResponse.fromWorkSpace(workSpace)
+        );
+    }
+
     @PostMapping("/account/{accountId}")
     public ResponseEntity<WorkSpaceResponse> create(
             @PathVariable("accountId") String accountId,
