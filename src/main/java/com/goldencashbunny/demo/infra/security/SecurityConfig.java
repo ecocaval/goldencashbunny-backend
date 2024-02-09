@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                             .requestMatchers(HttpMethod.POST, "v1/auth").permitAll() // account authentication
+                            .requestMatchers(HttpMethod.POST, "v1/auth/refresh-token").permitAll() // account authentication
                             .requestMatchers(HttpMethod.POST, "v1/account").permitAll() // account creation
                             .anyRequest().authenticated()
                 )

@@ -225,7 +225,7 @@ public class SpaceController {
     }
 
     @PatchMapping("/space/table/column/{columnId}")
-    public ResponseEntity<List<SpaceTableColumnResponse>> updateTableColumn(
+    public ResponseEntity<SpaceTableResponse> updateTableColumn(
             @PathVariable("columnId") String columnId,
             @RequestBody @Valid UpdateSpaceTableColumnRequest request
     ) {
@@ -234,10 +234,7 @@ public class SpaceController {
         JwtUtils.validateAdminRoleOrSameAccount(column.getSpaceTable().getSpace().getWorkspace().getAccount().getId());
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                this.spaceUseCase.updateColumn(request, column)
-                        .stream()
-                        .map(SpaceTableColumnResponse::fromSpaceTableColumn)
-                        .toList()
+                SpaceTableResponse.fromSpaceTable(this.spaceUseCase.updateColumn(request, column))
         );
     }
 

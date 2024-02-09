@@ -49,6 +49,10 @@ public class Account extends BaseEntity {
     @ToString.Exclude
     private List<Workspace> workspaces;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "account")
+    @ToString.Exclude
+    private List<RefreshToken> refreshTokens;
+
     public static Account fromCreateRequest(CreateAccountRequest createAccountRequest) {
         return Account.builder()
                 .id(UUID.randomUUID())

@@ -1,6 +1,7 @@
 package com.goldencashbunny.demo.presentation.controllers;
 
 import com.goldencashbunny.demo.core.data.requests.AuthenticationRequest;
+import com.goldencashbunny.demo.core.data.requests.RefreshTokenAuthenticationRequest;
 import com.goldencashbunny.demo.core.data.responses.AuthenticationResponse;
 import com.goldencashbunny.demo.core.usecases.AuthenticationUseCase;
 import jakarta.validation.Valid;
@@ -24,8 +25,11 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
-        return ResponseEntity.ok().body(
-            new AuthenticationResponse(this.authenticationUseCase.authenticate(request))
-        );
+        return ResponseEntity.ok().body(this.authenticationUseCase.authenticate(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthenticationResponse> authenticateByRefreshToken(@RequestBody @Valid RefreshTokenAuthenticationRequest request) {
+        return ResponseEntity.ok().body(this.authenticationUseCase.authenticateWithRefreshToken(request));
     }
 }

@@ -1,0 +1,10 @@
+CREATE TABLE refresh_token (
+   id UUID NOT NULL,
+   creation_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW() NOT NULL,
+   last_modified_date TIMESTAMP WITHOUT TIME ZONE,
+   deleted BOOLEAN DEFAULT FALSE NOT NULL,
+   account_id UUID NOT NULL,
+   CONSTRAINT pk_refreshtoken PRIMARY KEY (id)
+);
+
+ALTER TABLE refresh_token ADD CONSTRAINT FK_REFRESHTOKEN_ON_ACCOUNT FOREIGN KEY (account_id) REFERENCES account (id);

@@ -30,7 +30,7 @@ public interface SpaceUseCase {
 
     SpaceTableColumn createColumn(CreateSpaceTableColumnRequest request, SpaceTable table);
 
-    List<SpaceTableColumn> updateColumn(UpdateSpaceTableColumnRequest request, SpaceTableColumn nonUpdatedColumn);
+    SpaceTable updateColumn(UpdateSpaceTableColumnRequest request, SpaceTableColumn nonUpdatedColumn);
 
     void deleteManyColumns(Set<SpaceTableColumn> columns);
 

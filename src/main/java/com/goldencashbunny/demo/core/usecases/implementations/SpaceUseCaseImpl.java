@@ -147,25 +147,27 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
 
     @Override
     @Transactional
-    public List<SpaceTableColumn> updateColumn(UpdateSpaceTableColumnRequest request, SpaceTableColumn nonUpdatedColumn) {
+    public SpaceTable updateColumn(UpdateSpaceTableColumnRequest request, SpaceTableColumn nonUpdatedColumn) {
 
         var updatedColumn = SpaceTableColumn.fromUpdateSpaceTableColumnRequest(request, nonUpdatedColumn);
 
         if (request.getColumnReference() == null) {
-            return List.of(this.spaceTableColumnRepository.save(updatedColumn));
+            this.findTableById(updatedColumn.getSpaceTable().getId().toString());
         }
 
         validateUpdatedColumnReference(request.getColumnReference(), nonUpdatedColumn);
 
         var allRemainingColumns = this.spaceTableColumnRepository.findBySpaceTableIdAndColumnReferenceNotIn(
-                updatedColumn.getSpaceTable().getId(), Collections.singleton(nonUpdatedColumn.getColumnReference())
+            updatedColumn.getSpaceTable().getId(), Collections.singleton(nonUpdatedColumn.getColumnReference())
         );
 
         adjustColumnsReferencesDueToUpdate(updatedColumn, nonUpdatedColumn, allRemainingColumns);
 
         allRemainingColumns.add(updatedColumn);
 
-        return this.spaceTableColumnRepository.saveAll(allRemainingColumns);
+        this.spaceTableColumnRepository.saveAll(allRemainingColumns);
+
+        return this.findTableById(updatedColumn.getSpaceTable().getId().toString());
     }
 
     @Override
