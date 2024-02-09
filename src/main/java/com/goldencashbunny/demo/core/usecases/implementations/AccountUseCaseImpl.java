@@ -182,6 +182,11 @@ public class AccountUseCaseImpl implements AccountUseCase {
 
     private void validateDuplicity(Account account) {
 
+        if (this.accountRepository.existsByUserNameAndUserNameIsNotNull(account.getUserName()))
+            throw new DuplicationOnRegistrationException(
+                    ErrorMessages.ERROR_ACCOUNT_DUPLICATED_BY_USER_NAME.getMessage(), "username", account.getUserName()
+            );
+
         if (this.accountRepository.existsByEmailAndEmailIsNotNull(account.getEmail()))
             throw new DuplicationOnRegistrationException(
                     ErrorMessages.ERROR_ACCOUNT_DUPLICATED_BY_EMAIL.getMessage(), "email", account.getEmail()

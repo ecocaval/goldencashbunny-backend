@@ -18,6 +18,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     Optional<Account> findByCnpjAndDeletedFalse(String cnpj);
 
+    boolean existsByUserNameAndUserNameIsNotNull(String userName);
+
     boolean existsByEmailAndEmailIsNotNull(String email);
 
     boolean existsByCpfAndCpfIsNotNull(String cpf);
