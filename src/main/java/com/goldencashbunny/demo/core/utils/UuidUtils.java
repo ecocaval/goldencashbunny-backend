@@ -19,4 +19,8 @@ public class UuidUtils {
 
         return validatedUuid;
     }
+
+    public static void getValidUuidFromString(String uuid) {
+        UUID.fromString(uuid);
+    }
 }

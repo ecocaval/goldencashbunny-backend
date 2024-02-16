@@ -49,7 +49,7 @@ public class AccountController {
     ) {
         JwtUtils.validateAdminRoleOrSameAccount(accountId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
+        return ResponseEntity.ok(
             AccountResponse.fromAccount(this.accountUseCase.update(request, accountId))
         );
     }

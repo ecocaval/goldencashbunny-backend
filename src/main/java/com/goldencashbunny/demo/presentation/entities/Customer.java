@@ -81,9 +81,9 @@ public class Customer extends BaseEntity {
                 .workspace(workspace)
                 .build();
 
-        if (request.getCustomerAdditionalEmails() != null) {
+        if (request.getAdditionalEmails() != null) {
             customer.setCustomerAdditionalEmails(
-                    request.getCustomerAdditionalEmails().stream()
+                    request.getAdditionalEmails().stream()
                             .map(email -> new CustomerAdditionalEmail(customer, email))
                             .toList()
             );

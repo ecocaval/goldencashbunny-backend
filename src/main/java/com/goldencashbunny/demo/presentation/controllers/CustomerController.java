@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("v1/customer")
 public class CustomerController {
@@ -34,6 +37,21 @@ public class CustomerController {
         JwtUtils.validateAdminRoleOrSameAccount(customer.getWorkspace().getAccount().getId());
 
         return ResponseEntity.ok(CustomerResponse.fromCustomer(customer));
+    }
+
+    @GetMapping("/workspace/{workSpaceId}")
+    public ResponseEntity<Set<CustomerResponse>> findCustomersByWorkspaceId(
+            @PathVariable("workSpaceId") String workSpaceId
+    ) {
+        var workSpace = this.workSpaceUseCase.findById(workSpaceId);
+
+        JwtUtils.validateAdminRoleOrSameAccount(workSpace.getAccount().getId());
+
+        return ResponseEntity.ok(
+                workSpace.getCustomers().stream()
+                        .map(CustomerResponse::fromCustomer)
+                        .collect(Collectors.toSet())
+        );
     }
 
     @PostMapping("/workspace/{workSpaceId}")

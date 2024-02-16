@@ -374,9 +374,17 @@ public class SpaceUseCaseImpl implements SpaceUseCase {
                     );
                 break;
 
+            case CUSTOMER:
+                try {
+                    UuidUtils.getValidUuidFromString(value);
+                } catch (IllegalArgumentException ex) {
+                    throw new InvalidValueForColumnTypeException(
+                            ErrorMessages.ERROR_INVALID_VALUE_FOR_COLUMN_TYPE.getMessage(), value, columnType.name()
+                    );
+                }
+
             // case TEXT: if the value is text anything will be accepted as value...
         }
-        ;
     }
 
     private String adjustValueAccordingToColumnType(String value, SpaceTableColumnType columnType) {
