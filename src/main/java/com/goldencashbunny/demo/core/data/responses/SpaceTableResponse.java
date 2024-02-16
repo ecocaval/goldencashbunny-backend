@@ -1,5 +1,6 @@
 package com.goldencashbunny.demo.core.data.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.goldencashbunny.demo.presentation.entities.SpaceTable;
 import com.goldencashbunny.demo.presentation.entities.SpaceTableColumn;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SpaceTableResponse {
 
     private UUID id;

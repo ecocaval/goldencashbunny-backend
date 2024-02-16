@@ -1,5 +1,6 @@
 package com.goldencashbunny.demo.core.data.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.goldencashbunny.demo.core.data.dtos.ViaCepDto;
 import com.goldencashbunny.demo.core.data.enums.BrazilState;
 import com.goldencashbunny.demo.core.utils.AsciiUtils;
@@ -15,15 +16,23 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddressResponse {
 
     private UUID id;
+
     private String zipCode;
+
     private String name;
+
     private String complement;
+
     private String neighborhood;
+
     private String city;
+
     private BrazilState state;
+
     private String ibgeCode;
 
     public static AddressResponse fromViaCepDto(ViaCepDto viaCepDto) {

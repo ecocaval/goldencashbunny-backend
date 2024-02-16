@@ -1,12 +1,6 @@
 package com.goldencashbunny.demo.core.data.requests;
 
 import com.goldencashbunny.demo.core.data.enums.BrazilState;
-import com.goldencashbunny.demo.presentation.entities.Address;
-import com.goldencashbunny.demo.presentation.entities.Customer;
-import com.goldencashbunny.demo.presentation.entities.CustomerAdditionalEmail;
-import com.goldencashbunny.demo.presentation.entities.Workspace;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,9 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CreateCustomerRequest {
+public class UpdateCustomerRequest {
 
-    @NotBlank(message = "O nome do cliente precisa ser informado.")
     private String firstName;
 
     private String lastName;
@@ -35,14 +28,16 @@ public class CreateCustomerRequest {
 
     private String phone;
 
-    private CreateAddressRequest Address;
+    private UpdateAddressRequest Address;
 
-    private List<String> additionalEmails;
+    private List<String> additionalEmailsToAdd;
+
+    private List<String> additionalEmailsToRemove;
 
     @NoArgsConstructor
     @AllArgsConstructor
     @Data
-    public static class CreateAddressRequest {
+    public static class UpdateAddressRequest {
 
         private String zipCode;
 

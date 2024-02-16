@@ -1,5 +1,6 @@
 package com.goldencashbunny.demo.core.data.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.goldencashbunny.demo.presentation.entities.Account;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountResponse {
 
     private UUID id;

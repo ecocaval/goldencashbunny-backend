@@ -1,12 +1,17 @@
 package com.goldencashbunny.demo.presentation.entities;
 
 import com.goldencashbunny.demo.core.data.requests.CreateCustomerRequest;
+import com.goldencashbunny.demo.core.data.requests.UpdateCustomerRequest;
 import com.goldencashbunny.demo.presentation.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Entity
 @AllArgsConstructor
@@ -14,6 +19,8 @@ import java.util.List;
 @SuperBuilder
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE customer SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class Customer extends BaseEntity {
 
     @Column(nullable = false)
@@ -50,6 +57,19 @@ public class Customer extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private List<CustomerAdditionalEmail> customerAdditionalEmails;
 
+    public Customer(Customer customer) {
+        this.firstName = customer.getFirstName();
+        this.lastName = customer.getLastName();
+        this.cpf = customer.getCpf();
+        this.cnpj = customer.getCnpj();
+        this.companyName = customer.getCompanyName();
+        this.socialCompanyName = customer.getSocialCompanyName();
+        this.email = customer.getEmail();
+        this.phone = customer.getPhone();
+        this.address = customer.getAddress();
+        this.workspace = customer.getWorkspace();
+    }
+
     public static Customer fromCreateRequest(CreateCustomerRequest request, Workspace workspace) {
         var customer = Customer.builder()
                 .firstName(request.getFirstName())
@@ -61,7 +81,7 @@ public class Customer extends BaseEntity {
                 .workspace(workspace)
                 .build();
 
-        if(request.getCustomerAdditionalEmails() != null) {
+        if (request.getCustomerAdditionalEmails() != null) {
             customer.setCustomerAdditionalEmails(
                     request.getCustomerAdditionalEmails().stream()
                             .map(email -> new CustomerAdditionalEmail(customer, email))
@@ -69,7 +89,7 @@ public class Customer extends BaseEntity {
             );
         }
 
-        if(request.getAddress() != null) {
+        if (request.getAddress() != null) {
             customer.setAddress(
                     Address.builder()
                             .zipCode(request.getAddress().getZipCode())
@@ -86,6 +106,58 @@ public class Customer extends BaseEntity {
         }
 
         return customer;
+    }
+
+    public static Customer fromUpdateRequest(UpdateCustomerRequest updateCustomerRequest, Customer nonUpdatedCustomer) {
+
+        var updatedCustomer = new Customer(nonUpdatedCustomer);
+
+        Optional.ofNullable(updateCustomerRequest.getFirstName()).ifPresent(updatedCustomer::setFirstName);
+
+        Optional.ofNullable(updateCustomerRequest.getLastName()).ifPresent(updatedCustomer::setLastName);
+
+        Optional.ofNullable(updateCustomerRequest.getCpf()).ifPresent(updatedCustomer::setCpf);
+
+        Optional.ofNullable(updateCustomerRequest.getCnpj()).ifPresent(updatedCustomer::setCnpj);
+
+        Optional.ofNullable(updateCustomerRequest.getCompanyName()).ifPresent(updatedCustomer::setCompanyName);
+
+        Optional.ofNullable(updateCustomerRequest.getSocialCompanyName()).ifPresent(updatedCustomer::setSocialCompanyName);
+
+        Optional.ofNullable(updateCustomerRequest.getEmail()).ifPresent(updatedCustomer::setEmail);
+
+        Optional.ofNullable(updateCustomerRequest.getPhone()).ifPresent(updatedCustomer::setPhone);
+
+        Optional.ofNullable(updateCustomerRequest.getAddress()).ifPresent(address ->
+                updatedCustomer.setAddress(Address.fromUpdateRequest(address, updatedCustomer))
+        );
+
+        var updatedCustomerEmails = nonUpdatedCustomer.getCustomerAdditionalEmails();
+
+        updatedCustomer.setCustomerAdditionalEmails(updatedCustomerEmails);
+
+        if (updateCustomerRequest.getAdditionalEmailsToAdd() != null) {
+
+            List<CustomerAdditionalEmail> updatedEmails = updateCustomerRequest.getAdditionalEmailsToAdd().stream()
+                    .map(email -> new CustomerAdditionalEmail(nonUpdatedCustomer, email))
+                    .collect(Collectors.toList());
+
+            if (updatedCustomerEmails != null) {
+                updatedEmails.addAll(updatedCustomerEmails);
+            }
+
+            updatedCustomer.setCustomerAdditionalEmails(updatedEmails);
+        }
+
+        if(updateCustomerRequest.getAdditionalEmailsToRemove() != null) {
+            List<CustomerAdditionalEmail> updatedEmails = updatedCustomer.getCustomerAdditionalEmails().stream()
+                    .filter(email -> !updateCustomerRequest.getAdditionalEmailsToRemove().contains(email.getEmail()))
+                    .toList();
+
+            updatedCustomer.setCustomerAdditionalEmails(updatedEmails);
+        }
+
+        return updatedCustomer;
     }
 
 }

@@ -43,6 +43,15 @@ public class Workspace extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspace")
     private List<Customer> customers;
 
+    public Workspace(Workspace workspace) {
+        this.companyName = workspace.getCompanyName();
+        this.socialCompanyName = workspace.getSocialCompanyName();
+        this.isFavorite = workspace.isFavorite();
+        this.account = workspace.getAccount();
+        this.spaces = workspace.getSpaces();
+        this.customers = workspace.getCustomers();
+    }
+
     public static Workspace fromCreateWorkSpaceDto(CreateWorkSpaceDto createWorkSpaceDto) {
         return Workspace.builder()
                 .companyName(createWorkSpaceDto.getCompanyName())
@@ -54,7 +63,7 @@ public class Workspace extends BaseEntity {
 
     public static Workspace fromUpdateRequest(UpdateWorkSpaceRequest updateWorkSpaceRequest, Workspace nonUpdatedWorkSpace) {
 
-        var updatedWorkSpace = nonUpdatedWorkSpace;
+        var updatedWorkSpace = new Workspace(nonUpdatedWorkSpace);
 
         if(updateWorkSpaceRequest.getCompanyName() != null) {
             updatedWorkSpace.setCompanyName(updateWorkSpaceRequest.getCompanyName());
